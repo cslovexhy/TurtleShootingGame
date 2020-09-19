@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="b29bd942-032e-4cc0-b200-cbb5b1a7d04d" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeStyleSettingsInfer">
+    <option name="done" value="true" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="1" />
+  </component>
+  <component name="ProjectId" id="1eWY6wGUbX12A1LlaUH5SexWmRO" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.PyGameTest">
+    <configuration name="BranchProcessor" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="SuPlayThings" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/BranchProcessor.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="CoinCombo" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="SuPlayThings" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/CoinCombo.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="CursesTest" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="SuPlayThings" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/CursesTest.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="PyGameTest" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="SuPlayThings" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/PyGameTest.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test1" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="SuPlayThings" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test1.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.CoinCombo" />
+      <item itemvalue="Python.CursesTest" />
+      <item itemvalue="Python.PyGameTest" />
+      <item itemvalue="Python.test1" />
+      <item itemvalue="Python.BranchProcessor" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.PyGameTest" />
+        <item itemvalue="Python.BranchProcessor" />
+        <item itemvalue="Python.test1" />
+        <item itemvalue="Python.CoinCombo" />
+        <item itemvalue="Python.CursesTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b29bd942-032e-4cc0-b200-cbb5b1a7d04d" name="Default Changelist" comment="" />
+      <created>1594438643440</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1594438643440</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="184" y="99" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1595634378614">
+      <screen x="0" y="23" width="1440" height="826" />
+    </state>
+    <state x="184" y="99" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.826/1440.-793.2560.1417@0.23.1440.826" timestamp="1595634378614" />
+    <state width="1398" height="191" key="GridCell.Tab.0.bottom" timestamp="1600501387924">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state width="2094" height="444" key="GridCell.Tab.0.bottom/0.23.1440.825/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1594701148023" />
+    <state width="1398" height="242" key="GridCell.Tab.0.bottom/0.23.1440.825@0.23.1440.825" timestamp="1595619104372" />
+    <state width="1398" height="264" key="GridCell.Tab.0.bottom/0.23.1440.826/1440.-793.2560.1417@0.23.1440.826" timestamp="1595639184526" />
+    <state width="1098" height="297" key="GridCell.Tab.0.bottom/0.23.1440.826/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600207640190" />
+    <state width="1836" height="558" key="GridCell.Tab.0.bottom/0.23.1440.827/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600323054977" />
+    <state width="1502" height="352" key="GridCell.Tab.0.bottom/0.23.1440.828/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600390448944" />
+    <state width="1398" height="191" key="GridCell.Tab.0.bottom/0.23.1440.828@0.23.1440.828" timestamp="1600501387924" />
+    <state width="1954" height="352" key="GridCell.Tab.0.bottom/0.23.1440.829/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600407975489" />
+    <state width="1502" height="352" key="GridCell.Tab.0.bottom/0.23.1440.830/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600403936893" />
+    <state width="1652" height="183" key="GridCell.Tab.0.bottom/0.23.1440.877/1440.-793.2560.1337@1440.-793.2560.1337" timestamp="1600283562812" />
+    <state width="1398" height="191" key="GridCell.Tab.0.center" timestamp="1600501387923">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state width="2094" height="444" key="GridCell.Tab.0.center/0.23.1440.825/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1594701148022" />
+    <state width="1398" height="242" key="GridCell.Tab.0.center/0.23.1440.825@0.23.1440.825" timestamp="1595619104372" />
+    <state width="1398" height="264" key="GridCell.Tab.0.center/0.23.1440.826/1440.-793.2560.1417@0.23.1440.826" timestamp="1595639184525" />
+    <state width="1098" height="297" key="GridCell.Tab.0.center/0.23.1440.826/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600207640189" />
+    <state width="1836" height="558" key="GridCell.Tab.0.center/0.23.1440.827/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600323054975" />
+    <state width="1502" height="352" key="GridCell.Tab.0.center/0.23.1440.828/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600390448943" />
+    <state width="1398" height="191" key="GridCell.Tab.0.center/0.23.1440.828@0.23.1440.828" timestamp="1600501387923" />
+    <state width="1954" height="352" key="GridCell.Tab.0.center/0.23.1440.829/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600407975488" />
+    <state width="1502" height="352" key="GridCell.Tab.0.center/0.23.1440.830/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600403936892" />
+    <state width="1652" height="183" key="GridCell.Tab.0.center/0.23.1440.877/1440.-793.2560.1337@1440.-793.2560.1337" timestamp="1600283562812" />
+    <state width="1398" height="191" key="GridCell.Tab.0.left" timestamp="1600501387923">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state width="2094" height="444" key="GridCell.Tab.0.left/0.23.1440.825/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1594701148021" />
+    <state width="1398" height="242" key="GridCell.Tab.0.left/0.23.1440.825@0.23.1440.825" timestamp="1595619104371" />
+    <state width="1398" height="264" key="GridCell.Tab.0.left/0.23.1440.826/1440.-793.2560.1417@0.23.1440.826" timestamp="1595639184524" />
+    <state width="1098" height="297" key="GridCell.Tab.0.left/0.23.1440.826/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600207640189" />
+    <state width="1836" height="558" key="GridCell.Tab.0.left/0.23.1440.827/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600323054974" />
+    <state width="1502" height="352" key="GridCell.Tab.0.left/0.23.1440.828/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600390448942" />
+    <state width="1398" height="191" key="GridCell.Tab.0.left/0.23.1440.828@0.23.1440.828" timestamp="1600501387923" />
+    <state width="1954" height="352" key="GridCell.Tab.0.left/0.23.1440.829/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600407975487" />
+    <state width="1502" height="352" key="GridCell.Tab.0.left/0.23.1440.830/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600403936891" />
+    <state width="1652" height="183" key="GridCell.Tab.0.left/0.23.1440.877/1440.-793.2560.1337@1440.-793.2560.1337" timestamp="1600283562812" />
+    <state width="1398" height="191" key="GridCell.Tab.0.right" timestamp="1600501387924">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state width="2094" height="444" key="GridCell.Tab.0.right/0.23.1440.825/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1594701148022" />
+    <state width="1398" height="242" key="GridCell.Tab.0.right/0.23.1440.825@0.23.1440.825" timestamp="1595619104372" />
+    <state width="1398" height="264" key="GridCell.Tab.0.right/0.23.1440.826/1440.-793.2560.1417@0.23.1440.826" timestamp="1595639184525" />
+    <state width="1098" height="297" key="GridCell.Tab.0.right/0.23.1440.826/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600207640190" />
+    <state width="1836" height="558" key="GridCell.Tab.0.right/0.23.1440.827/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600323054976" />
+    <state width="1502" height="352" key="GridCell.Tab.0.right/0.23.1440.828/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600390448944" />
+    <state width="1398" height="191" key="GridCell.Tab.0.right/0.23.1440.828@0.23.1440.828" timestamp="1600501387924" />
+    <state width="1954" height="352" key="GridCell.Tab.0.right/0.23.1440.829/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600407975488" />
+    <state width="1502" height="352" key="GridCell.Tab.0.right/0.23.1440.830/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1600403936892" />
+    <state width="1652" height="183" key="GridCell.Tab.0.right/0.23.1440.877/1440.-793.2560.1337@1440.-793.2560.1337" timestamp="1600283562812" />
+    <state width="1398" height="264" key="GridCell.Tab.1.bottom" timestamp="1595639184528">
+      <screen x="0" y="23" width="1440" height="826" />
+    </state>
+    <state width="1398" height="264" key="GridCell.Tab.1.bottom/0.23.1440.826/1440.-793.2560.1417@0.23.1440.826" timestamp="1595639184528" />
+    <state width="1398" height="264" key="GridCell.Tab.1.center" timestamp="1595639184526">
+      <screen x="0" y="23" width="1440" height="826" />
+    </state>
+    <state width="1398" height="264" key="GridCell.Tab.1.center/0.23.1440.826/1440.-793.2560.1417@0.23.1440.826" timestamp="1595639184526" />
+    <state width="1398" height="264" key="GridCell.Tab.1.left" timestamp="1595639184526">
+      <screen x="0" y="23" width="1440" height="826" />
+    </state>
+    <state width="1398" height="264" key="GridCell.Tab.1.left/0.23.1440.826/1440.-793.2560.1417@0.23.1440.826" timestamp="1595639184526" />
+    <state width="1398" height="264" key="GridCell.Tab.1.right" timestamp="1595639184527">
+      <screen x="0" y="23" width="1440" height="826" />
+    </state>
+    <state width="1398" height="264" key="GridCell.Tab.1.right/0.23.1440.826/1440.-793.2560.1417@0.23.1440.826" timestamp="1595639184527" />
+    <state x="2383" y="-389" width="670" height="676" key="search.everywhere.popup" timestamp="1594441100026">
+      <screen x="1440" y="-793" width="2560" height="1417" />
+    </state>
+    <state x="2383" y="-389" width="670" height="676" key="search.everywhere.popup/0.23.1440.826/1440.-793.2560.1417@1440.-793.2560.1417" timestamp="1594441100026" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="event" language="Python" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>
