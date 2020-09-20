@@ -2,6 +2,7 @@
 
 import turtle, math, time, heapq
 from functools import partial
+from copy import deepcopy
 
 WINDOW_X, WINDOW_Y = 800, 600
 FRAME = 24
@@ -18,130 +19,31 @@ SNIPER = "SNIPER"
 AI_DECISION_MOVE = "AI_DECISION_MOVE"
 
 
-class BattleUnit:
-    def __init__(self, start_pos, health, attack, defense, speed=1.0, skills=None):
-        if skills is None:
-            skills = list()
-        self.start_pos = start_pos
-        self.max_health = health
-        self.health = health
-        self.attack = attack
-        self.defense = defense
-        self.speed = speed
-        self.skills = {skill.key: skill for skill in skills}
-
-
-class PlayerUnit(BattleUnit):
-    def __init__(self, start_pos, health, attack, defense, speed=1.2, skills=None):
-        assert len(skills) >= 2
-        super().__init__(start_pos, health, attack, defense, speed, skills)
-        self.left_click_skill_key = skills[0].key
-        self.right_click_skill_key = skills[1].key
-
-
-class EnemyUnit(BattleUnit):
-    def __init__(self, start_pos, health, attack, defense, player, ai_mode=ENFORCER, speed=.5, skills=None):
-        super().__init__(start_pos, health, attack, defense, speed, skills)
-        self.ai = AI(ai_mode, self, player)
-
-
-class Skill:
-    def __init__(self, name, key, cool_down):
-        self.name = name
-        self.key = key
-        self.cool_down = cool_down
-        self.last_used = 0
-
-
-class SimpleRangedSkill(Skill):
-    # conversion means how much % of attack goes into damage
-    def __init__(self, name, key, attack_range, flying_speed, conversion, cool_down, shape, color):
-        super().__init__(name, key, cool_down)
-        self.flying_speed = flying_speed
-        self.attack_range = attack_range
-        self.conversion = conversion
-        self.shape = shape
-        self.color = color
-
-
-class AI:
-    def __init__(self, ai_mode, battle_unit, target_unit):
-        self.ai_mode = ai_mode
-        self.battle_unit = battle_unit
-        self.target_unit = target_unit
-
-    def decide(self):
-        if self.ai_mode == ENFORCER:
-            t = self.target_unit.ui
-            tx, ty = t.xcor(), t.ycor()
-            b = self.battle_unit.ui
-            bx, by = b.xcor(), b.ycor()
-            max_step = BATTLE_UNIT_BASE_SPEED * self.battle_unit.speed
-
-            step_x, step_y = 0, 0
-            # move horizontally
-            if abs(bx - tx) > abs(by - ty):
-                if bx > tx:
-                    step_x = -min(bx - tx, max_step)
-                else:
-                    step_x = min(tx - bx, max_step)
-            # move vertically
-            else:
-                if by > ty:
-                    step_y = -min(by - ty, max_step)
-                else:
-                    step_y = min(ty - by, max_step)
-
-            return {"decision": AI_DECISION_MOVE, "step": (step_x, step_y)}
-        else:
-            raise Exception("ai_mode {} is not supported yet".format(self.ai_mode))
-
-
-def get_new_cors_4way(t, dist):
-    x, y = t.xcor(), t.ycor()
-    if t.direction == UP:
-        y += dist
-    if t.direction == DOWN:
-        y -= dist
-    if t.direction == RIGHT:
-        x += dist
-    if t.direction == LEFT:
-        x -= dist
-    return x, y
-
-
 def get_new_cors(t, dist):
-    if not hasattr(t, "target_pos"):
-        return get_new_cors_4way(t, dist)
-    else:
-        # orig missile pos and target missile pos decides the direction, has nothing to do with current missile pos
-        ox, oy = t.orig_pos
-        tx, ty = t.target_pos
+    assert hasattr(t, "target_pos")
+    assert hasattr(t, "orig_pos")
 
-        dx, dy = tx - ox, ty - oy
-        r = math.sqrt(dx * dx + dy * dy)
-        theta_cos = math.acos(dx / r)
-        theta_sin = math.asin(dy / r)
+    if t.target_pos == t.orig_pos:
+        return t.orig_pos
 
-        dx = dist * math.cos(theta_cos)
-        dy = dist * math.sin(theta_sin)
+    # orig missile pos and target missile pos decides the direction, has nothing to do with current missile pos
+    ox, oy = t.orig_pos
+    tx, ty = t.target_pos
 
-        return t.xcor() + dx, t.ycor() + dy
+    dx, dy = tx - ox, ty - oy
+    r = math.sqrt(dx * dx + dy * dy)
+    theta_cos = math.acos(dx / r)
+    theta_sin = math.asin(dy / r)
 
+    dx = dist * math.cos(theta_cos)
+    dy = dist * math.sin(theta_sin)
 
-def go_four_ways(t, direction):
-    # t.last_dir = t.direction = direction
-    if t.direction == STOP:
-        if t.last_dir == direction:
-            t.direction = direction
-        else:
-            t.last_dir = direction
-    else:
-        t.last_dir = t.direction = direction
+    return t.xcor() + dx, t.ycor() + dy
 
 
 def stop_moving(t):
-    t.direction = STOP
+    t.orig_pos = (t.xcor(), t.ycor())
+    t.target_pos = (t.xcor(), t.ycor())
 
 
 def get_dist(a, b):
@@ -208,31 +110,70 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
     return None
 
 
-def find_first_collision_old(moving_obj, potential_target_map, new_cors):
-    target_min_heap = []
-    for t_id, t in potential_target_map.items():
-        dist = t.distance(moving_obj.xcor(), moving_obj.ycor())
-        heapq.heappush(target_min_heap, (dist, t_id))
+class BattleUnit:
+    def __init__(self, start_pos, health, attack, defense, speed=1.0, skills=None):
+        if skills is None:
+            skills = list()
+        self.start_pos = start_pos
+        self.max_health = health
+        self.health = health
+        self.attack = attack
+        self.defense = defense
+        self.speed = speed
+        self.skills = {skill.key: skill for skill in skills}
 
-    ox, oy = moving_obj.xcor(), moving_obj.ycor()
-    nx, ny = new_cors
-    while target_min_heap:
-        dist, t_id = heapq.heappop(target_min_heap)
-        t = potential_target_map[t_id]
-        tx, ty = t.xcor(), t.ycor()
-        # if missile collides with enemy's current position, count as valid collision
-        if ox == nx and min(oy, ny) <= ty <= max(oy, ny) and abs(ox - tx) <= 20.0 * (t._stretchfactor[0] + moving_obj._stretchfactor[0]) / 2:
-            return t
-        elif oy == ny and min(ox, nx) <= tx <= max(ox, nx) and abs(oy - ty) <= 20.0 * (t._stretchfactor[1] + moving_obj._stretchfactor[1]) / 2:
-            return t
-        # if missile collides with enemy's prev position, also count as valid collision
-        tx, ty = t.prev_pos
-        if ox == nx and min(oy, ny) <= ty <= max(oy, ny) and abs(ox - tx) <= 20.0 * (t._stretchfactor[0] + moving_obj._stretchfactor[0]) / 2:
-            return t
-        elif oy == ny and min(ox, nx) <= tx <= max(ox, nx) and abs(oy - ty) <= 20.0 * (t._stretchfactor[1] + moving_obj._stretchfactor[1]) / 2:
-            return t
 
-    return None
+class PlayerUnit(BattleUnit):
+    def __init__(self, start_pos, health, attack, defense, speed=1.2, skills=None):
+        assert len(skills) >= 2
+        super().__init__(start_pos, health, attack, defense, speed, skills)
+        self.left_click_skill_key = skills[0].key
+        self.right_click_skill_key = skills[1].key
+
+
+class EnemyUnit(BattleUnit):
+    def __init__(self, start_pos, health, attack, defense, player, ai_mode=ENFORCER, speed=.5, skills=None):
+        super().__init__(start_pos, health, attack, defense, speed, skills)
+        self.ai = AI(ai_mode, self, player)
+
+
+class Skill:
+    def __init__(self, name, key, cool_down):
+        self.name = name
+        self.key = key
+        self.cool_down = cool_down
+        self.last_used = 0
+
+
+class SimpleRangedSkill(Skill):
+    # conversion means how much % of attack goes into damage
+    def __init__(self, name, key, attack_range, flying_speed, conversion, cool_down, shape, color):
+        super().__init__(name, key, cool_down)
+        self.flying_speed = flying_speed
+        self.attack_range = attack_range
+        self.conversion = conversion
+        self.shape = shape
+        self.color = color
+
+
+class AI:
+    def __init__(self, ai_mode, battle_unit, target_unit):
+        self.ai_mode = ai_mode
+        self.battle_unit = battle_unit
+        self.target_unit = target_unit
+
+    def decide(self):
+        if self.ai_mode == ENFORCER:
+            t = self.target_unit.ui
+            tx, ty = t.xcor(), t.ycor()
+            b = self.battle_unit.ui
+            bx, by = b.xcor(), b.ycor()
+            max_step = BATTLE_UNIT_BASE_SPEED * self.battle_unit.speed
+            b.orig_pos = (bx, by)
+            b.target_pos = (tx, ty)
+            return {"decision": AI_DECISION_MOVE, "next_stop": get_new_cors(b, max_step)}
+        else:
+            raise Exception("ai_mode {} is not supported yet".format(self.ai_mode))
 
 
 class GameView:
@@ -255,7 +196,9 @@ class GameView:
         p.color(COLOR_PLAYER)
         p.penup()
         p.goto(player.start_pos[0], player.start_pos[1])
-        p.prev_pos = player.start_pos
+        p.prev_pos = deepcopy(player.start_pos)
+        p.target_pos = deepcopy(player.start_pos)
+        p.orig_pos = deepcopy(player.start_pos)
         p.last_dir = UP
         p.direction = STOP
         p.player_data = player
@@ -270,7 +213,9 @@ class GameView:
             e.color(COLOR_ENEMY)
             e.penup()
             e.goto(enemy.start_pos[0], enemy.start_pos[1])
-            e.prev_pos = enemy.start_pos
+            e.prev_pos = deepcopy(enemy.start_pos)
+            e.target_pos = deepcopy(enemy.start_pos)
+            e.orig_pos = deepcopy(enemy.start_pos)
             e.shapesize(enemy.health / player.max_health)
             e.direction = STOP
             e.enemy_data = enemy
@@ -282,12 +227,9 @@ class GameView:
 
         # event listener setup
         win.listen()
-        win.onkey(partial(go_four_ways, p, UP), "w")
-        win.onkey(partial(go_four_ways, p, DOWN), "s")
-        win.onkey(partial(go_four_ways, p, RIGHT), "d")
-        win.onkey(partial(go_four_ways, p, LEFT), "a")
-        win.onkey(partial(stop_moving, p), "z")
-        win.onclick(self.attack_with_left_click)
+        win.onkey(partial(stop_moving, p), 's')
+        win.onclick(self.move_with_left_click)
+        win.onclick(self.attack_with_right_click, 2)
         for key in p.player_data.skills:
             win.onkey(partial(self.select_skill, key), key)
 
@@ -316,7 +258,12 @@ class GameView:
     def select_skill(self, skill_key):
         self.player.player_data.left_click_skill_key = skill_key
 
-    def attack_with_left_click(self, target_x, target_y):
+    def move_with_left_click(self, target_x, target_y):
+        p = self.player
+        p.orig_pos = (p.xcor(), p.ycor())
+        p.target_pos = (target_x, target_y)
+
+    def attack_with_right_click(self, target_x, target_y):
         p = self.player
         x, y = p.xcor(), p.ycor()
         if target_x == x and target_y == y:
@@ -362,18 +309,14 @@ class GameView:
         p = self.player
         x, y = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.player_data.speed)
         p.prev_pos = (p.xcor(), p.ycor())
-        p.setx(x)
-        p.sety(y)
+        p.goto(x, y)
 
         # enemy ai actions
         for e_id, e in self.enemies.items():
             decision = e.enemy_data.ai.decide()
             if decision['decision'] == AI_DECISION_MOVE:
-                step_x, step_y = decision['step']
-                orig_x, orig_y = e.xcor(), e.ycor()
-                e.prev_pos = (orig_x, orig_y)
-                e.setx(orig_x + step_x)
-                e.sety(orig_y + step_y)
+                next_x, next_y = decision['next_stop']
+                e.goto(next_x, next_y)
 
         # move missiles
         for m_id in self.missiles:
