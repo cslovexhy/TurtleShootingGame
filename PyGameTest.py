@@ -19,16 +19,27 @@ SNIPER = "SNIPER"
 AI_DECISION_MOVE = "AI_DECISION_MOVE"
 
 
-def get_new_cors(t, dist):
+# t: moving turtle
+# dist: max stride can take
+# hard_stop: should stop at .target_pos or can move a little further
+def get_new_cors(t, dist, hard_stop=False):
     assert hasattr(t, "target_pos")
     assert hasattr(t, "orig_pos")
 
     if t.target_pos == t.orig_pos:
         return t.orig_pos
 
-    # orig missile pos and target missile pos decides the direction, has nothing to do with current missile pos
+    # orig turtle pos and target turtle pos decides the direction, has nothing to do with current turtle pos
     ox, oy = t.orig_pos
     tx, ty = t.target_pos
+    cx, cy = t.xcor(), t.ycor()
+
+    if hard_stop:
+        # For player moving, if we are closer to target than 1 max step,
+        # just go there directly, no more calculation needed
+        c2t_dist = get_dist((cx, cy), (tx, ty))
+        if c2t_dist < dist:
+            return tx, ty
 
     dx, dy = tx - ox, ty - oy
     r = math.sqrt(dx * dx + dy * dy)
@@ -50,7 +61,7 @@ def get_dist(a, b):
     return math.sqrt(math.pow(a[0] - b[0], 2) + math.pow(a[1] - b[1], 2))
 
 
-def get_dist_dot_to_line(dot, line_dot_1, line_dot_2):
+def get_dist_dot_to_line(dot, line_dot_1, line_dot_2, id, msg):
     # get a, b, c in ax + by + c = 0 first
     x1, y1 = line_dot_1
     x2, y2 = line_dot_2
@@ -71,7 +82,7 @@ def get_dist_dot_to_line(dot, line_dot_1, line_dot_2):
     x0, y0 = dot
     dist = abs((a * x0 + b * y0 + c) / math.sqrt(a * a + b * b))
 
-    print("dist from ({}, {}) to line ({}, {}) - ({}, {}) = {}".format(str(x0), str(y0), str(x1), str(y1), str(x2), str(y2), str(dist)))
+    print("dist from {} ({}) ({}, {}) to line ({}, {}) - ({}, {}) = {}".format(id, msg, str(x0), str(y0), str(x1), str(y1), str(x2), str(y2), str(dist)))
     return dist
 
 
@@ -96,7 +107,7 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
         # here need to make sure dot to line dist (line) falls on the line segment
         # this is guaranteed by making sure angles from both ends of the line segment < 90 degrees
         aa, bb, cc = a * a, b * b, c * c
-        if cc + aa > bb and cc + bb > aa and get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny)) <= min_collision_dist:
+        if cc + aa > bb and cc + bb > aa and get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "curr") <= min_collision_dist:
             return t
 
         # if missile collides with enemy's prev position, also count as valid collision
@@ -104,7 +115,7 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
         a = get_dist((tx, ty), (ox, oy))
         b = get_dist((tx, ty), (nx, ny))
         aa, bb, cc = a * a, b * b, c * c
-        if cc + aa > bb and cc + bb > aa and get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny)) <= min_collision_dist:
+        if cc + aa > bb and cc + bb > aa and get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "prev") <= min_collision_dist:
             return t
 
     return None
@@ -307,7 +318,7 @@ class GameView:
     def tick(self):
         # move player
         p = self.player
-        x, y = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.player_data.speed)
+        x, y = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.player_data.speed, True)
         p.prev_pos = (p.xcor(), p.ycor())
         p.goto(x, y)
 
@@ -316,6 +327,7 @@ class GameView:
             decision = e.enemy_data.ai.decide()
             if decision['decision'] == AI_DECISION_MOVE:
                 next_x, next_y = decision['next_stop']
+                e.prev_pos = (e.xcor(), e.ycor())
                 e.goto(next_x, next_y)
 
         # move missiles
@@ -395,13 +407,13 @@ class CasualGame:
         # self.enemies.append(EnemyUnit(start_pos=(100, -100), health=50, attack=7, defense=2, player=self.player))
 
         # 7 enemies
-        self.enemies.append(EnemyUnit(start_pos=(100, 100), health=20, attack=5, defense=2, player=self.player))
-        self.enemies.append(EnemyUnit(start_pos=(100, 0), health=30, attack=5, defense=3, player=self.player))
-        self.enemies.append(EnemyUnit(start_pos=(100, -100), health=50, attack=7, defense=2, player=self.player))
-        self.enemies.append(EnemyUnit(start_pos=(100, -200), health=50, attack=7, defense=2, player=self.player))
-        self.enemies.append(EnemyUnit(start_pos=(100, -300), health=50, attack=7, defense=2, player=self.player))
-        self.enemies.append(EnemyUnit(start_pos=(100, -400), health=50, attack=7, defense=2, player=self.player))
-        self.enemies.append(EnemyUnit(start_pos=(100, -500), health=50, attack=7, defense=2, player=self.player))
+        self.enemies.append(EnemyUnit(start_pos=(100, 100), health=20, attack=5, defense=2, player=self.player, speed=.5))
+        self.enemies.append(EnemyUnit(start_pos=(100, 0), health=30, attack=5, defense=3, player=self.player, speed=.55))
+        self.enemies.append(EnemyUnit(start_pos=(100, -100), health=50, attack=7, defense=2, player=self.player, speed=.6))
+        self.enemies.append(EnemyUnit(start_pos=(100, -200), health=50, attack=7, defense=2, player=self.player, speed=.65))
+        self.enemies.append(EnemyUnit(start_pos=(100, -300), health=50, attack=7, defense=2, player=self.player, speed=.7))
+        self.enemies.append(EnemyUnit(start_pos=(100, -400), health=50, attack=7, defense=2, player=self.player, speed=.75))
+        self.enemies.append(EnemyUnit(start_pos=(100, -500), health=50, attack=7, defense=2, player=self.player, speed=.8))
 
         self.view = GameView(self.dim, self.player, self.enemies)
 
