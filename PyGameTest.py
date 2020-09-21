@@ -105,6 +105,9 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
         tx, ty = t.xcor(), t.ycor()
         a = get_dist((tx, ty), (ox, oy))
         b = get_dist((tx, ty), (nx, ny))
+        # handle too-close case, regardless of direction
+        if min(a, b) < min_collision_dist:
+            return t
         # here need to make sure dot to line dist (line) falls on the line segment
         # this is guaranteed by making sure angles from both ends of the line segment < 90 degrees
         aa, bb, cc = a * a, b * b, c * c
@@ -115,6 +118,9 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
         tx, ty = t.prev_pos
         a = get_dist((tx, ty), (ox, oy))
         b = get_dist((tx, ty), (nx, ny))
+        # handle too-close case, regardless of direction
+        if min(a, b) < min_collision_dist:
+            return t
         aa, bb, cc = a * a, b * b, c * c
         if cc + aa > bb and cc + bb > aa and get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "prev") <= min_collision_dist:
             return t
