@@ -97,7 +97,8 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
     while target_min_heap:
         dist, t_id = heapq.heappop(target_min_heap)
         t = potential_target_map[t_id]
-        min_collision_dist = ((20.0 * (t._stretchfactor[0] + moving_obj._stretchfactor[0]) / 2) + (20.0 * (t._stretchfactor[1] + moving_obj._stretchfactor[1]) / 2)) / 2
+        min_collision_dist = ((20.0 * (t._stretchfactor[0] + moving_obj._stretchfactor[0]) / 2) +
+                              (20.0 * (t._stretchfactor[1] + moving_obj._stretchfactor[1]) / 2)) / 2
 
         c = get_dist((ox, oy), (nx, ny))
         # if missile collides with enemy's current position, count as valid collision
@@ -202,6 +203,7 @@ class GameView:
         # player setup
         self.player = turtle.Turtle()
         p = self.player
+        p.alive = True
         p.speed(0)
         p.shape("square")
         p.color(COLOR_PLAYER)
@@ -248,6 +250,13 @@ class GameView:
         iter_count = 0
         while True:
             win.update()
+            # grace period before window shut down
+            if hasattr(win, 'ttl'):
+                now = time.time()
+                if now < win.ttl:
+                    time.sleep(win.ttl - now)
+                break
+
             # debug starts
             if 0: #  0 == iter_count % 20:
                 turtles = win.turtles()
@@ -262,6 +271,12 @@ class GameView:
                 ))
             # debug ends
             self.tick()
+            if not self.enemies:
+                print("You win.")
+                win.ttl = time.time() + 3
+            if not self.player.alive:
+                print("You lose.")
+                win.ttl = time.time() + 3
             time.sleep(SLEEP_INTERVAL)
             # p.direction = STOP
             iter_count += 1
@@ -327,6 +342,8 @@ class GameView:
             decision = e.enemy_data.ai.decide()
             if decision['decision'] == AI_DECISION_MOVE:
                 next_x, next_y = decision['next_stop']
+                if find_first_collision(e, {"player": self.player}, (next_x, next_y)):
+                    self.player.alive = False
                 e.prev_pos = (e.xcor(), e.ycor())
                 e.goto(next_x, next_y)
 
@@ -351,8 +368,7 @@ class GameView:
             elif math.sqrt(dx * dx + dy * dy) >= skill.attack_range:
                 m.ttl = 0
 
-            m.setx(x)
-            m.sety(y)
+            m.goto(x, y)
 
         # why do we need another loop to hide/delete? coz it's not good to delete the iterable while looping through it.
         now = time.time()
