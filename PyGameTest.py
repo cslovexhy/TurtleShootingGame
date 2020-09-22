@@ -22,12 +22,24 @@ AI_DECISION_MOVE = "AI_DECISION_MOVE"
 # t: moving turtle
 # dist: max stride can take
 # hard_stop: should stop at .target_pos or can move a little further
+
+
+def get_angle_for_vector(o, t):
+    ox, oy = o
+    tx, ty = t
+    dx, dy = tx - ox, ty - oy
+    r = math.sqrt(dx * dx + dy * dy)
+    theta_cos = math.acos(dx / r)
+    theta = abs(theta_cos) if ty >= oy else -abs(theta_cos)
+    return theta
+
+
 def get_new_cors(t, dist, hard_stop=False):
     assert hasattr(t, "target_pos")
     assert hasattr(t, "orig_pos")
 
     if t.target_pos == t.orig_pos:
-        return t.orig_pos
+        return t.orig_pos[0], t.orig_pos[0], t.heading()
 
     # orig turtle pos and target turtle pos decides the direction, has nothing to do with current turtle pos
     ox, oy = t.orig_pos
@@ -38,18 +50,15 @@ def get_new_cors(t, dist, hard_stop=False):
         # For player moving, if we are closer to target than 1 max step,
         # just go there directly, no more calculation needed
         c2t_dist = get_dist((cx, cy), (tx, ty))
+        theta = get_angle_for_vector((ox, oy), (tx, ty))
         if c2t_dist < dist:
-            return tx, ty
+            return tx, ty, int(theta / math.pi * 180)
 
-    dx, dy = tx - ox, ty - oy
-    r = math.sqrt(dx * dx + dy * dy)
-    theta_cos = math.acos(dx / r)
-    theta_sin = math.asin(dy / r)
+    theta = get_angle_for_vector((ox, oy), (tx, ty))
+    dx = dist * math.cos(theta)
+    dy = dist * math.sin(theta)
 
-    dx = dist * math.cos(theta_cos)
-    dy = dist * math.sin(theta_sin)
-
-    return t.xcor() + dx, t.ycor() + dy
+    return t.xcor() + dx, t.ycor() + dy, int(theta / math.pi * 180)
 
 
 def stop_moving(t):
@@ -211,7 +220,7 @@ class GameView:
         p = self.player
         p.alive = True
         p.speed(0)
-        p.shape("square")
+        p.shape("turtle")
         p.color(COLOR_PLAYER)
         p.penup()
         p.goto(player.start_pos[0], player.start_pos[1])
@@ -220,6 +229,8 @@ class GameView:
         p.orig_pos = deepcopy(player.start_pos)
         p.last_dir = UP
         p.direction = STOP
+        p.stop = True
+        p.shooting_angle = 0
         p.player_data = player
         player.ui = p
 
@@ -228,7 +239,7 @@ class GameView:
         for enemy_id, enemy in enumerate(enemies):
             e = turtle.Turtle()
             e.id = "enemy_" + str(enemy_id)
-            e.shape("square")
+            e.shape("turtle")
             e.color(COLOR_ENEMY)
             e.penup()
             e.goto(enemy.start_pos[0], enemy.start_pos[1])
@@ -294,6 +305,7 @@ class GameView:
         p = self.player
         p.orig_pos = (p.xcor(), p.ycor())
         p.target_pos = (target_x, target_y)
+        p.stop = False
 
     def attack_with_right_click(self, target_x, target_y):
         p = self.player
@@ -301,7 +313,11 @@ class GameView:
         if target_x == x and target_y == y:
             print("need some angle to attack, skip")
             return
-
+        angle = get_angle_for_vector((x, y), (target_x, target_y)) / math.pi * 180
+        p.target_pos = (x, y)
+        p.stop = True
+        p.shooting_angle = angle
+        print("[2] set p angle = " + str(angle))
         skill = p.player_data.skills[p.player_data.left_click_skill_key]
         now = time.time()
         if not skill.last_used:
@@ -339,19 +355,26 @@ class GameView:
     def tick(self):
         # move player
         p = self.player
-        x, y = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.player_data.speed, True)
+        x, y, moving_angle = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.player_data.speed, True)
+        # print("angle = " + str(angle))
         p.prev_pos = (p.xcor(), p.ycor())
         p.goto(x, y)
+        print("[1] set p angle = " + str(moving_angle))
+        if p.stop:
+            p.setheading(p.shooting_angle)
+        else:
+            p.setheading(moving_angle)
 
         # enemy ai actions
         for e_id, e in self.enemies.items():
             decision = e.enemy_data.ai.decide()
             if decision['decision'] == AI_DECISION_MOVE:
-                next_x, next_y = decision['next_stop']
+                next_x, next_y, angle = decision['next_stop']
                 if find_first_collision(e, {"player": self.player}, (next_x, next_y)):
                     self.player.alive = False
                 e.prev_pos = (e.xcor(), e.ycor())
                 e.goto(next_x, next_y)
+                e.setheading(angle)
 
         # move missiles
         for m_id in self.missiles:
@@ -359,7 +382,7 @@ class GameView:
             m = self.missiles[m_id]
             skill = m.skill_data
             dist = MISSILE_BASE_SPEED * skill.flying_speed
-            x, y = get_new_cors(m, dist)
+            x, y, _ = get_new_cors(m, dist)
             orig_x, orig_y = m.orig_pos
             dx, dy = x - orig_x, y - orig_y
 
