@@ -24,6 +24,10 @@ AI_DECISION_MOVE = "AI_DECISION_MOVE"
 # hard_stop: should stop at .target_pos or can move a little further
 
 
+def to_int_degree(theta):
+    return int(theta / math.pi * 180)
+
+
 def get_angle_for_vector(o, t):
     ox, oy = o
     tx, ty = t
@@ -52,13 +56,13 @@ def get_new_cors(t, dist, hard_stop=False):
         c2t_dist = get_dist((cx, cy), (tx, ty))
         theta = get_angle_for_vector((ox, oy), (tx, ty))
         if c2t_dist < dist:
-            return tx, ty, int(theta / math.pi * 180)
+            return tx, ty, to_int_degree(theta)
 
     theta = get_angle_for_vector((ox, oy), (tx, ty))
     dx = dist * math.cos(theta)
     dy = dist * math.sin(theta)
 
-    return t.xcor() + dx, t.ycor() + dy, int(theta / math.pi * 180)
+    return t.xcor() + dx, t.ycor() + dy, to_int_degree(theta)
 
 
 def stop_moving(t):
@@ -91,7 +95,7 @@ def get_dist_dot_to_line(dot, line_dot_1, line_dot_2, id, msg):
     x0, y0 = dot
     dist = abs((a * x0 + b * y0 + c) / math.sqrt(a * a + b * b))
 
-    print("dist from {} ({}) ({}, {}) to line ({}, {}) - ({}, {}) = {}".format(id, msg, str(x0), str(y0), str(x1), str(y1), str(x2), str(y2), str(dist)))
+    # print("dist from {} ({}) ({}, {}) to line ({}, {}) - ({}, {}) = {}".format(id, msg, str(x0), str(y0), str(x1), str(y1), str(x2), str(y2), str(dist)))
     return dist
 
 
@@ -313,11 +317,11 @@ class GameView:
         if target_x == x and target_y == y:
             print("need some angle to attack, skip")
             return
-        angle = get_angle_for_vector((x, y), (target_x, target_y)) / math.pi * 180
+        angle = to_int_degree(get_angle_for_vector((x, y), (target_x, target_y)))
         p.target_pos = (x, y)
         p.stop = True
         p.shooting_angle = angle
-        print("[2] set p angle = " + str(angle))
+        # print("[2] set p angle = " + str(angle))
         skill = p.player_data.skills[p.player_data.left_click_skill_key]
         now = time.time()
         if not skill.last_used:
@@ -359,7 +363,7 @@ class GameView:
         # print("angle = " + str(angle))
         p.prev_pos = (p.xcor(), p.ycor())
         p.goto(x, y)
-        print("[1] set p angle = " + str(moving_angle))
+        # print("[1] set p angle = " + str(moving_angle))
         if p.stop:
             p.setheading(p.shooting_angle)
         else:
