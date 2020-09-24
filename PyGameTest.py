@@ -6,6 +6,8 @@ from copy import deepcopy
 
 WINDOW_X, WINDOW_Y = 800, 600
 FRAME = 24
+MIN_SHAPE_PCT = 20
+STANDARD_HEALTH = 100
 SLEEP_INTERVAL = 1 / FRAME
 COLOR_BG = (.8, .8, .8)  # gray
 COLOR_PLAYER = (1, 0, 0)  # red
@@ -141,6 +143,32 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
     return None
 
 
+def get_shape_size(health):
+    return max(MIN_SHAPE_PCT/100, health/STANDARD_HEALTH)
+
+
+def handle_melee_damage(battle_unit, attacker):
+    # TODO:
+    return
+
+
+def handle_missile_damage(battle_unit, missile):
+    bu, m = battle_unit, missile
+    damage = m.owner.battle_unit_data.attack * m.skill_data.conversion
+    # print("damage = " + str(damage))
+    health = battle_unit.battle_unit_data.health
+    # print("health before = " + str(health))
+    health = max(0, health - damage)
+    # print("health after = " + str(health))
+    battle_unit.battle_unit_data.health = health
+    if health == 0:
+        battle_unit.hideturtle()
+        return True
+    else:
+        battle_unit.shapesize(get_shape_size(health))
+        return False
+
+
 class BattleUnit:
     def __init__(self, start_pos, health, attack, defense, speed=1.0, skills=None):
         if skills is None:
@@ -235,7 +263,7 @@ class GameView:
         p.direction = STOP
         p.stop = True
         p.shooting_angle = 0
-        p.player_data = player
+        p.battle_unit_data = player
         player.ui = p
 
         # enemy setup
@@ -250,9 +278,9 @@ class GameView:
             e.prev_pos = deepcopy(enemy.start_pos)
             e.target_pos = deepcopy(enemy.start_pos)
             e.orig_pos = deepcopy(enemy.start_pos)
-            e.shapesize(enemy.health / player.max_health)
+            e.shapesize(get_shape_size(enemy.health))
             e.direction = STOP
-            e.enemy_data = enemy
+            e.battle_unit_data = enemy
             enemy.ui = e
             self.enemies[e.id] = e
 
@@ -264,7 +292,7 @@ class GameView:
         win.onkey(partial(stop_moving, p), 's')
         win.onclick(self.move_with_left_click)
         win.onclick(self.attack_with_right_click, 2)
-        for key in p.player_data.skills:
+        for key in p.battle_unit_data.skills:
             win.onkey(partial(self.select_skill, key), key)
 
         # main loop
@@ -303,7 +331,7 @@ class GameView:
             iter_count += 1
 
     def select_skill(self, skill_key):
-        self.player.player_data.left_click_skill_key = skill_key
+        self.player.battle_unit_data.left_click_skill_key = skill_key
 
     def move_with_left_click(self, target_x, target_y):
         p = self.player
@@ -322,7 +350,7 @@ class GameView:
         p.stop = True
         p.shooting_angle = angle
         # print("[2] set p angle = " + str(angle))
-        skill = p.player_data.skills[p.player_data.left_click_skill_key]
+        skill = p.battle_unit_data.skills[p.battle_unit_data.left_click_skill_key]
         now = time.time()
         if not skill.last_used:
             skill.last_used = now
@@ -348,6 +376,7 @@ class GameView:
         m.target_pos = (target_x, target_y)
         m.shapesize(0.5)
         m.skill_data = skill
+        m.owner = p
 
         speed_per_sec = MISSILE_BASE_SPEED * FRAME * skill.flying_speed
         max_flying_time = skill.attack_range / speed_per_sec
@@ -359,7 +388,7 @@ class GameView:
     def tick(self):
         # move player
         p = self.player
-        x, y, moving_angle = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.player_data.speed, True)
+        x, y, moving_angle = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.battle_unit_data.speed, True)
         # print("angle = " + str(angle))
         p.prev_pos = (p.xcor(), p.ycor())
         p.goto(x, y)
@@ -371,7 +400,7 @@ class GameView:
 
         # enemy ai actions
         for e_id, e in self.enemies.items():
-            decision = e.enemy_data.ai.decide()
+            decision = e.battle_unit_data.ai.decide()
             if decision['decision'] == AI_DECISION_MOVE:
                 next_x, next_y, angle = decision['next_stop']
                 if find_first_collision(e, {"player": self.player}, (next_x, next_y)):
@@ -393,10 +422,11 @@ class GameView:
             # collision on enemy or wall, TODO: wall
             enemy_hit = find_first_collision(m, self.enemies, (x, y))
             if enemy_hit is not None:
-                # TODO: do damage, not instant kill
-                enemy_hit.hideturtle()
-                del self.enemies[enemy_hit.id]
-                print("{} is down, {} left.".format(enemy_hit.id, str(len(self.enemies))))
+                dead = handle_missile_damage(enemy_hit, m)
+                # enemy_hit.hideturtle()
+                if dead:
+                    del self.enemies[enemy_hit.id]
+                    print("{} is down, {} left.".format(enemy_hit.id, str(len(self.enemies))))
                 m.ttl = 0
             elif math.sqrt(dx * dx + dy * dy) >= skill.attack_range:
                 m.ttl = 0
@@ -446,7 +476,7 @@ class CasualGame:
             color="blue"
         )
         player_skills = [skill_fire_ball, skill_ice_ball]
-        self.player = PlayerUnit(start_pos=(0, 0), health=100, attack=10, defense=3, speed=1.2, skills=player_skills)
+        self.player = PlayerUnit(start_pos=(0, 0), health=STANDARD_HEALTH, attack=10, defense=3, speed=1.2, skills=player_skills)
 
         self.enemies = []
 
