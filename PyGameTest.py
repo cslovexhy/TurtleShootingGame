@@ -3,236 +3,10 @@
 import turtle, math, time, heapq
 from functools import partial
 from copy import deepcopy
-
-WINDOW_X, WINDOW_Y = 800, 600
-FRAME = 24
-MIN_SHAPE_PCT = 20
-STANDARD_HEALTH = 100
-SLEEP_INTERVAL = 1 / FRAME
-COLOR_BG = (.8, .8, .8)  # gray
-COLOR_PLAYER = (1, 0, 0)  # red
-COLOR_ENEMY = (0, 1, 0)
-UP, DOWN, RIGHT, LEFT, STOP = "up", "down", "right", "left", "stop"
-BATTLE_UNIT_BASE_SPEED = 50 / FRAME      # 50 pixel per second
-MISSILE_BASE_SPEED = 200 / FRAME    # 200 pixel per second
-ENFORCER = "ENFORCER"
-SNIPER = "SNIPER"
-
-AI_DECISION_MOVE = "AI_DECISION_MOVE"
-
-
-# t: moving turtle
-# dist: max stride can take
-# hard_stop: should stop at .target_pos or can move a little further
-
-
-def to_int_degree(theta):
-    return int(theta / math.pi * 180)
-
-
-def get_angle_for_vector(o, t):
-    ox, oy = o
-    tx, ty = t
-    dx, dy = tx - ox, ty - oy
-    r = math.sqrt(dx * dx + dy * dy)
-    theta_cos = math.acos(dx / r)
-    theta = abs(theta_cos) if ty >= oy else -abs(theta_cos)
-    return theta
-
-
-def get_new_cors(t, dist, hard_stop=False):
-    assert hasattr(t, "target_pos")
-    assert hasattr(t, "orig_pos")
-
-    if t.target_pos == t.orig_pos:
-        return t.orig_pos[0], t.orig_pos[0], t.heading()
-
-    # orig turtle pos and target turtle pos decides the direction, has nothing to do with current turtle pos
-    ox, oy = t.orig_pos
-    tx, ty = t.target_pos
-    cx, cy = t.xcor(), t.ycor()
-
-    if hard_stop:
-        # For player moving, if we are closer to target than 1 max step,
-        # just go there directly, no more calculation needed
-        c2t_dist = get_dist((cx, cy), (tx, ty))
-        theta = get_angle_for_vector((ox, oy), (tx, ty))
-        if c2t_dist < dist:
-            return tx, ty, to_int_degree(theta)
-
-    theta = get_angle_for_vector((ox, oy), (tx, ty))
-    dx = dist * math.cos(theta)
-    dy = dist * math.sin(theta)
-
-    return t.xcor() + dx, t.ycor() + dy, to_int_degree(theta)
-
-
-def stop_moving(t):
-    t.orig_pos = (t.xcor(), t.ycor())
-    t.target_pos = (t.xcor(), t.ycor())
-
-
-def get_dist(a, b):
-    return math.sqrt(math.pow(a[0] - b[0], 2) + math.pow(a[1] - b[1], 2))
-
-
-def get_dist_dot_to_line(dot, line_dot_1, line_dot_2, id, msg):
-    # get a, b, c in ax + by + c = 0 first
-    x1, y1 = line_dot_1
-    x2, y2 = line_dot_2
-    if x1 == x2:
-        a, b, c = 0, 1, -y1
-    elif y1 == y2:
-        a, b, c = 1, 0, -x1
-    else:
-        # y = kx + z =>
-        # kx - y + b = 0 =>
-        # a = k = (y2-y1)/(x2-x1)
-        # b = -1,
-        # c = z = y - kx = y1 - k * x1 = y1 - a * x1
-        a, b = (y2-y1)/(x2-x1), -1
-        c = y1 - a * x1
-
-    # use dot to line formula
-    x0, y0 = dot
-    dist = abs((a * x0 + b * y0 + c) / math.sqrt(a * a + b * b))
-
-    # print("dist from {} ({}) ({}, {}) to line ({}, {}) - ({}, {}) = {}".format(id, msg, str(x0), str(y0), str(x1), str(y1), str(x2), str(y2), str(dist)))
-    return dist
-
-
-def find_first_collision(moving_obj, potential_target_map, new_cors):
-    target_min_heap = []
-    for t_id, t in potential_target_map.items():
-        dist = t.distance(moving_obj.xcor(), moving_obj.ycor())
-        heapq.heappush(target_min_heap, (dist, t_id))
-
-    ox, oy = moving_obj.xcor(), moving_obj.ycor()
-    nx, ny = new_cors
-    while target_min_heap:
-        dist, t_id = heapq.heappop(target_min_heap)
-        t = potential_target_map[t_id]
-        min_collision_dist = ((20.0 * (t._stretchfactor[0] + moving_obj._stretchfactor[0]) / 2) +
-                              (20.0 * (t._stretchfactor[1] + moving_obj._stretchfactor[1]) / 2)) / 2
-
-        c = get_dist((ox, oy), (nx, ny))
-        # if missile collides with enemy's current position, count as valid collision
-        tx, ty = t.xcor(), t.ycor()
-        a = get_dist((tx, ty), (ox, oy))
-        b = get_dist((tx, ty), (nx, ny))
-        # handle too-close case, regardless of direction
-        if min(a, b) < min_collision_dist:
-            return t
-        # here need to make sure dot to line dist (line) falls on the line segment
-        # this is guaranteed by making sure angles from both ends of the line segment < 90 degrees
-        aa, bb, cc = a * a, b * b, c * c
-        if cc + aa > bb and cc + bb > aa and get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "curr") <= min_collision_dist:
-            return t
-
-        # if missile collides with enemy's prev position, also count as valid collision
-        tx, ty = t.prev_pos
-        a = get_dist((tx, ty), (ox, oy))
-        b = get_dist((tx, ty), (nx, ny))
-        # handle too-close case, regardless of direction
-        if min(a, b) < min_collision_dist:
-            return t
-        aa, bb, cc = a * a, b * b, c * c
-        if cc + aa > bb and cc + bb > aa and get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "prev") <= min_collision_dist:
-            return t
-
-    return None
-
-
-def get_shape_size(health):
-    return max(MIN_SHAPE_PCT/100, health/STANDARD_HEALTH)
-
-
-def handle_melee_damage(battle_unit, attacker):
-    # TODO:
-    return
-
-
-def handle_missile_damage(battle_unit, missile):
-    bu, m = battle_unit, missile
-    damage = m.owner.battle_unit_data.attack * m.skill_data.conversion
-    # print("damage = " + str(damage))
-    health = battle_unit.battle_unit_data.health
-    # print("health before = " + str(health))
-    health = max(0, health - damage)
-    # print("health after = " + str(health))
-    battle_unit.battle_unit_data.health = health
-    if health == 0:
-        battle_unit.hideturtle()
-        return True
-    else:
-        battle_unit.shapesize(get_shape_size(health))
-        return False
-
-
-class BattleUnit:
-    def __init__(self, start_pos, health, attack, defense, speed=1.0, skills=None):
-        if skills is None:
-            skills = list()
-        self.start_pos = start_pos
-        self.max_health = health
-        self.health = health
-        self.attack = attack
-        self.defense = defense
-        self.speed = speed
-        self.skills = {skill.key: skill for skill in skills}
-
-
-class PlayerUnit(BattleUnit):
-    def __init__(self, start_pos, health, attack, defense, speed=1.2, skills=None):
-        assert len(skills) >= 2
-        super().__init__(start_pos, health, attack, defense, speed, skills)
-        self.left_click_skill_key = skills[0].key
-        self.right_click_skill_key = skills[1].key
-
-
-class EnemyUnit(BattleUnit):
-    def __init__(self, start_pos, health, attack, defense, player, ai_mode=ENFORCER, speed=.5, skills=None):
-        super().__init__(start_pos, health, attack, defense, speed, skills)
-        self.ai = AI(ai_mode, self, player)
-
-
-class Skill:
-    def __init__(self, name, key, cool_down):
-        self.name = name
-        self.key = key
-        self.cool_down = cool_down
-        self.last_used = 0
-
-
-class SimpleRangedSkill(Skill):
-    # conversion means how much % of attack goes into damage
-    def __init__(self, name, key, attack_range, flying_speed, conversion, cool_down, shape, color):
-        super().__init__(name, key, cool_down)
-        self.flying_speed = flying_speed
-        self.attack_range = attack_range
-        self.conversion = conversion
-        self.shape = shape
-        self.color = color
-
-
-class AI:
-    def __init__(self, ai_mode, battle_unit, target_unit):
-        self.ai_mode = ai_mode
-        self.battle_unit = battle_unit
-        self.target_unit = target_unit
-
-    def decide(self):
-        if self.ai_mode == ENFORCER:
-            t = self.target_unit.ui
-            tx, ty = t.xcor(), t.ycor()
-            b = self.battle_unit.ui
-            bx, by = b.xcor(), b.ycor()
-            max_step = BATTLE_UNIT_BASE_SPEED * self.battle_unit.speed
-            b.orig_pos = (bx, by)
-            b.target_pos = (tx, ty)
-            return {"decision": AI_DECISION_MOVE, "next_stop": get_new_cors(b, max_step)}
-        else:
-            raise Exception("ai_mode {} is not supported yet".format(self.ai_mode))
+from SkillDefinition import *
+from BattleUnitDefinition import *
+from Utils import *
+from Constants import *
 
 
 class GameView:
@@ -286,6 +60,7 @@ class GameView:
 
         # missiles setup
         self.missiles = dict()
+        self.enemy_missiles = dict()
 
         # event listener setup
         win.listen()
@@ -341,49 +116,10 @@ class GameView:
 
     def attack_with_right_click(self, target_x, target_y):
         p = self.player
-        x, y = p.xcor(), p.ycor()
-        if target_x == x and target_y == y:
-            print("need some angle to attack, skip")
-            return
-        angle = to_int_degree(get_angle_for_vector((x, y), (target_x, target_y)))
-        p.target_pos = (x, y)
-        p.stop = True
-        p.shooting_angle = angle
-        # print("[2] set p angle = " + str(angle))
-        skill = p.battle_unit_data.skills[p.battle_unit_data.left_click_skill_key]
-        now = time.time()
-        if not skill.last_used:
-            skill.last_used = now
-        else:
-            time_since_last_use = now - skill.last_used
-            if time_since_last_use > skill.cool_down:
-                skill.last_used = now
-            else:
-                print("{} in cool down, wait for {} seconds".format(
-                    skill.name,
-                    str(skill.cool_down - time_since_last_use)
-                ))
-                return
+        fire_missile(p, (target_x, target_y), self.missiles)
 
-        missile = turtle.Turtle()
-        m = missile
-        m.penup()
-        m.id = "missile_" + str(len(self.missiles))
-        m.shape(skill.shape)
-        m.color(skill.color)
-        m.goto(x, y)
-        m.orig_pos = (x, y)
-        m.target_pos = (target_x, target_y)
-        m.shapesize(0.5)
-        m.skill_data = skill
-        m.owner = p
-
-        speed_per_sec = MISSILE_BASE_SPEED * FRAME * skill.flying_speed
-        max_flying_time = skill.attack_range / speed_per_sec
-        # print("speed_per_sec = " + str(speed_per_sec) + ", max_flying_time = " + str(max_flying_time))
-        m.ttl = now + max_flying_time
-
-        self.missiles[m.id] = m
+    def enemy_attack(self, attacker, target_cor):
+        return fire_missile(attacker, target_cor, self.enemy_missiles)
 
     def tick(self):
         # move player
@@ -401,18 +137,18 @@ class GameView:
         # enemy ai actions
         for e_id, e in self.enemies.items():
             decision = e.battle_unit_data.ai.decide()
-            if decision['decision'] == AI_DECISION_MOVE:
+            print("decision for enemy {} is: {}".format(str(e_id), str(decision)))
+            if decision['decision'] == AI_DECISION_ATTACK:
+                target_cor = decision['target_cor']
+                self.enemy_attack(e, target_cor)
+            elif decision['decision'] == AI_DECISION_MOVE:
                 next_x, next_y, angle = decision['next_stop']
-                if find_first_collision(e, {"player": self.player}, (next_x, next_y)):
-                    self.player.alive = False
                 e.prev_pos = (e.xcor(), e.ycor())
                 e.goto(next_x, next_y)
                 e.setheading(angle)
 
-        # move missiles
-        for m_id in self.missiles:
-            # print("[tick] checking missile: " + m_id)
-            m = self.missiles[m_id]
+        # move player missiles
+        for m_id, m in self.missiles.items():
             skill = m.skill_data
             dist = MISSILE_BASE_SPEED * skill.flying_speed
             x, y, _ = get_new_cors(m, dist)
@@ -433,21 +169,46 @@ class GameView:
 
             m.goto(x, y)
 
+        # move enemy missiles
+        for m_id, m in self.enemy_missiles.items():
+            skill = m.skill_data
+            dist = MISSILE_BASE_SPEED * skill.flying_speed
+            x, y, _ = get_new_cors(m, dist)
+            orig_x, orig_y = m.orig_pos
+            dx, dy = x - orig_x, y - orig_y
+
+            # collision on enemy or wall, TODO: wall
+            bu_hit = find_first_collision(m, {"player": self.player}, (x, y))
+            if bu_hit is not None:
+                dead = handle_missile_damage(bu_hit, m)
+                if dead:
+                    self.player.alive = False
+                    print("Player down.")
+                m.ttl = 0
+            elif math.sqrt(dx * dx + dy * dy) >= skill.attack_range:
+                m.ttl = 0
+
+            m.goto(x, y)
+
         # why do we need another loop to hide/delete? coz it's not good to delete the iterable while looping through it.
         now = time.time()
 
         # TODO: here somehow if we hide missile, it stays on the screen sometimes.
         # and we have to loop through all expired missiles to keep hiding them if not.
         # this makes processing time increase somewhat linearly over missile generated historically.
-        for m_id, m in self.missiles.items():
-            # print("m_id = {}, now = {}, ttl = {}".format(m_id, str(now), str(m.ttl)))
-            if not m.isvisible() or now < m.ttl:
-                continue
-            print("hiding missile id=" + str(m_id))
-            # move this thing out of the screen
-            m.setx(WINDOW_X)
-            m.sety(WINDOW_Y)
-            m.hideturtle()
+        def handle_missile_visiblity(missiles):
+            for m_id, m in missiles.items():
+                # print("m_id = {}, now = {}, ttl = {}".format(m_id, str(now), str(m.ttl)))
+                if not m.isvisible() or now < m.ttl:
+                    continue
+                print("hiding missile id=" + str(m_id))
+                # move this thing out of the screen
+                m.setx(WINDOW_X)
+                m.sety(WINDOW_Y)
+                m.hideturtle()
+
+        handle_missile_visiblity(self.missiles)
+        handle_missile_visiblity(self.enemy_missiles)
 
 
 class CasualGame:
@@ -455,44 +216,24 @@ class CasualGame:
     def __init__(self):
         self.dim = (WINDOW_X, WINDOW_Y)
 
-        skill_fire_ball = SimpleRangedSkill(
-            name="Fire Ball",
-            key='1',
-            attack_range=200,
-            flying_speed=1,
-            conversion=0.7,
-            cool_down=0.3,
-            shape="circle",
-            color="red"
-        )
-        skill_ice_ball = SimpleRangedSkill(
-            name="Ice Ball",
-            key='2',
-            attack_range=300,
-            flying_speed=0.8,
-            conversion=0.5,
-            cool_down=1,
-            shape="circle",
-            color="blue"
-        )
         player_skills = [skill_fire_ball, skill_ice_ball]
-        self.player = PlayerUnit(start_pos=(0, 0), health=STANDARD_HEALTH, attack=10, defense=3, speed=1.2, skills=player_skills)
+        self.player = PlayerUnit(start_pos=(0, 0), health=STANDARD_HEALTH, attack=20, defense=3, speed=1.2, skills=player_skills)
 
         self.enemies = []
 
         # 3 enemies
-        # self.enemies.append(EnemyUnit(start_pos=(100, 100), health=20, attack=5, defense=2, player=self.player))
-        # self.enemies.append(EnemyUnit(start_pos=(100, 0), health=30, attack=5, defense=3, player=self.player))
-        # self.enemies.append(EnemyUnit(start_pos=(100, -100), health=50, attack=7, defense=2, player=self.player))
+        self.enemies.append(EnemyUnit(start_pos=(100, 100), health=20, attack=5, defense=2, player=self.player))
+        self.enemies.append(EnemyUnit(start_pos=(100, 0), health=30, attack=5, defense=3, player=self.player))
+        self.enemies.append(EnemyUnit(start_pos=(100, -100), health=50, attack=7, defense=2, player=self.player))
 
         # 7 enemies
-        self.enemies.append(EnemyUnit(start_pos=(100, 100), health=20, attack=5, defense=2, player=self.player, speed=.5))
-        self.enemies.append(EnemyUnit(start_pos=(100, 0), health=30, attack=5, defense=3, player=self.player, speed=.55))
-        self.enemies.append(EnemyUnit(start_pos=(100, -100), health=50, attack=7, defense=2, player=self.player, speed=.6))
-        self.enemies.append(EnemyUnit(start_pos=(100, -200), health=50, attack=7, defense=2, player=self.player, speed=.65))
-        self.enemies.append(EnemyUnit(start_pos=(100, -300), health=50, attack=7, defense=2, player=self.player, speed=.7))
-        self.enemies.append(EnemyUnit(start_pos=(100, -400), health=50, attack=7, defense=2, player=self.player, speed=.75))
-        self.enemies.append(EnemyUnit(start_pos=(100, -500), health=50, attack=7, defense=2, player=self.player, speed=.8))
+        # self.enemies.append(EnemyUnit(start_pos=(100, 100), health=20, attack=5, defense=2, player=self.player, speed=.5))
+        # self.enemies.append(EnemyUnit(start_pos=(100, 0), health=30, attack=5, defense=3, player=self.player, speed=.55))
+        # self.enemies.append(EnemyUnit(start_pos=(100, -100), health=50, attack=7, defense=2, player=self.player, speed=.6))
+        # self.enemies.append(EnemyUnit(start_pos=(100, -200), health=50, attack=7, defense=2, player=self.player, speed=.65))
+        # self.enemies.append(EnemyUnit(start_pos=(100, -300), health=50, attack=7, defense=2, player=self.player, speed=.7))
+        # self.enemies.append(EnemyUnit(start_pos=(100, -400), health=50, attack=7, defense=2, player=self.player, speed=.75))
+        # self.enemies.append(EnemyUnit(start_pos=(100, -500), health=50, attack=7, defense=2, player=self.player, speed=.8))
 
         self.view = GameView(self.dim, self.player, self.enemies)
 
