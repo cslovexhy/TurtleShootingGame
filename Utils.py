@@ -1,6 +1,7 @@
 import math, time, heapq
 import turtle
 from Constants import *
+from SkillDefinition import *
 
 
 def to_int_degree(theta):
@@ -141,6 +142,7 @@ def handle_missile_damage(battle_unit, missile):
         return True
     else:
         battle_unit.shapesize(get_shape_size(health))
+        battle_unit.battle_unit_data.add_effects(m.skill_data.effects)
         return False
 
 

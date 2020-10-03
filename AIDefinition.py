@@ -17,9 +17,9 @@ class AI:
             b = self.battle_unit.ui
             bx, by = b.xcor(), b.ycor()
             dist = get_dist((tx, ty), (bx, by))
-            max_step = BATTLE_UNIT_BASE_SPEED * self.battle_unit.speed
+            max_step = BATTLE_UNIT_BASE_SPEED * self.battle_unit.get_speed()
             skill = self.battle_unit.skills['3']
-            print("e_id = {}, dist = {}, range = {}".format(str(b.id), str(dist), str(skill.attack_range)))
+            # print("e_id = {}, dist = {}, range = {}".format(str(b.id), str(dist), str(skill.attack_range)))
             if dist < skill.attack_range and skill.is_ready():
                 return {"decision": AI_DECISION_ATTACK, "skill": skill, "target_cor": (tx, ty)}
             else:

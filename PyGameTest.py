@@ -137,7 +137,7 @@ class GameView:
         # enemy ai actions
         for e_id, e in self.enemies.items():
             decision = e.battle_unit_data.ai.decide()
-            print("decision for enemy {} is: {}".format(str(e_id), str(decision)))
+            # print("decision for enemy {} is: {}".format(str(e_id), str(decision)))
             if decision['decision'] == AI_DECISION_ATTACK:
                 target_cor = decision['target_cor']
                 self.enemy_attack(e, target_cor)
@@ -149,11 +149,14 @@ class GameView:
 
         # move player missiles
         for m_id, m in self.missiles.items():
+            if not m.isvisible():
+                continue
             skill = m.skill_data
             dist = MISSILE_BASE_SPEED * skill.flying_speed
             x, y, _ = get_new_cors(m, dist)
             orig_x, orig_y = m.orig_pos
             dx, dy = x - orig_x, y - orig_y
+            m.right(skill.spin)
 
             # collision on enemy or wall, TODO: wall
             enemy_hit = find_first_collision(m, self.enemies, (x, y))
@@ -171,11 +174,14 @@ class GameView:
 
         # move enemy missiles
         for m_id, m in self.enemy_missiles.items():
+            if not m.isvisible():
+                continue
             skill = m.skill_data
             dist = MISSILE_BASE_SPEED * skill.flying_speed
             x, y, _ = get_new_cors(m, dist)
             orig_x, orig_y = m.orig_pos
             dx, dy = x - orig_x, y - orig_y
+            m.right(skill.spin)
 
             # collision on enemy or wall, TODO: wall
             bu_hit = find_first_collision(m, {"player": self.player}, (x, y))
@@ -196,7 +202,7 @@ class GameView:
         # TODO: here somehow if we hide missile, it stays on the screen sometimes.
         # and we have to loop through all expired missiles to keep hiding them if not.
         # this makes processing time increase somewhat linearly over missile generated historically.
-        def handle_missile_visiblity(missiles):
+        def handle_missile_visibility(missiles):
             for m_id, m in missiles.items():
                 # print("m_id = {}, now = {}, ttl = {}".format(m_id, str(now), str(m.ttl)))
                 if not m.isvisible() or now < m.ttl:
@@ -207,8 +213,8 @@ class GameView:
                 m.sety(WINDOW_Y)
                 m.hideturtle()
 
-        handle_missile_visiblity(self.missiles)
-        handle_missile_visiblity(self.enemy_missiles)
+        handle_missile_visibility(self.missiles)
+        handle_missile_visibility(self.enemy_missiles)
 
 
 class CasualGame:
