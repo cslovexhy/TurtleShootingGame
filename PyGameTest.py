@@ -5,21 +5,27 @@ from functools import partial
 from copy import deepcopy
 from SkillDefinition import *
 from BattleUnitDefinition import *
+from LevelDefinition import *
 from Utils import *
 from Constants import *
 
 
 class GameView:
 
-    def __init__(self, dim, player, enemies):
+    def __init__(self, dim, level, player, enemies):
+
+        self.level_complete = False
 
         # window setup
+        print("init 1")
         self.win = turtle.Screen()
         win = self.win
-        win.title("Small game")
+        win.title("Small game, level {}".format(str(level)))
         win.bgcolor(COLOR_BG)
         win.setup(width=dim[0], height=dim[1])
         win.tracer(0)
+        if hasattr(win, "ttl"):
+            delattr(win, "ttl")
 
         # player setup
         self.player = turtle.Turtle()
@@ -79,25 +85,16 @@ class GameView:
                 now = time.time()
                 if now < win.ttl:
                     time.sleep(win.ttl - now)
+                else:
+                    print("ttl expired")
+                win.clear()
                 break
 
-            # debug starts
-            if 0: #  0 == iter_count % 20:
-                turtles = win.turtles()
-                visible_count = 0
-                for t in turtles:
-                    if t.isvisible():
-                        visible_count += 1
-                print("total count = {}, visible turtle count = {}, missile count = {}".format(
-                    str(len(turtles)),
-                    str(visible_count),
-                    str(len(self.missiles))
-                ))
-            # debug ends
             self.tick()
             if not self.enemies:
                 print("You win.")
                 win.ttl = time.time() + 3
+                self.level_complete = True
             if not self.player.alive:
                 print("You lose.")
                 win.ttl = time.time() + 3
@@ -222,26 +219,16 @@ class CasualGame:
     def __init__(self):
         self.dim = (WINDOW_X, WINDOW_Y)
 
-        player_skills = [skill_fire_ball, skill_ice_ball]
-        self.player = PlayerUnit(start_pos=(0, 0), health=STANDARD_HEALTH, attack=20, defense=3, speed=1.2, skills=player_skills)
-
-        self.enemies = []
-
-        # 3 enemies
-        self.enemies.append(EnemyUnit(start_pos=(100, 100), health=20, attack=5, defense=2, player=self.player))
-        self.enemies.append(EnemyUnit(start_pos=(100, 0), health=30, attack=5, defense=3, player=self.player))
-        self.enemies.append(EnemyUnit(start_pos=(100, -100), health=50, attack=7, defense=2, player=self.player))
-
-        # 7 enemies
-        # self.enemies.append(EnemyUnit(start_pos=(100, 100), health=20, attack=5, defense=2, player=self.player, speed=.5))
-        # self.enemies.append(EnemyUnit(start_pos=(100, 0), health=30, attack=5, defense=3, player=self.player, speed=.55))
-        # self.enemies.append(EnemyUnit(start_pos=(100, -100), health=50, attack=7, defense=2, player=self.player, speed=.6))
-        # self.enemies.append(EnemyUnit(start_pos=(100, -200), health=50, attack=7, defense=2, player=self.player, speed=.65))
-        # self.enemies.append(EnemyUnit(start_pos=(100, -300), health=50, attack=7, defense=2, player=self.player, speed=.7))
-        # self.enemies.append(EnemyUnit(start_pos=(100, -400), health=50, attack=7, defense=2, player=self.player, speed=.75))
-        # self.enemies.append(EnemyUnit(start_pos=(100, -500), health=50, attack=7, defense=2, player=self.player, speed=.8))
-
-        self.view = GameView(self.dim, self.player, self.enemies)
+        for level in range(MIN_LEVEL, MAX_LEVEL+1):
+            self.player = get_player_by_level(level)
+            self.enemies = get_enemies_by_level(level, self.player)
+            print("Initiating level {}".format(str(level)))
+            self.view = GameView(self.dim, level, self.player, self.enemies)
+            if not self.view.level_complete:
+                print("level {} failed, game over.".format(str(level)))
+                break
+            else:
+                print("level {} is complete".format(str(level)))
 
 
 game = CasualGame()

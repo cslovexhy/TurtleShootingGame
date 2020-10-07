@@ -38,11 +38,16 @@ class BattleUnit:
 
 
 class PlayerUnit(BattleUnit):
-    def __init__(self, start_pos, health, attack, defense, speed=1.2, skills=None):
-        assert len(skills) >= 2
+    def __init__(self, start_pos=(0, 0), health=STANDARD_HEALTH, attack=20, defense=3, speed=1.2, skills=None):
+        if skills is None:
+            skills = [skill_fire_ball]
+        assert len(skills) >= 1
         super().__init__(start_pos, health, attack, defense, speed, skills)
         self.left_click_skill_key = skills[0].key
-        self.right_click_skill_key = skills[1].key
+        if len(skills) == 1:
+            self.right_click_skill_key = skills[0].key
+        else:
+            self.right_click_skill_key = skills[1].key
 
 
 class EnemyUnit(BattleUnit):
