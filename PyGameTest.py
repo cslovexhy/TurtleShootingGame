@@ -12,7 +12,7 @@ from Constants import *
 
 class GameView:
 
-    def __init__(self, dim, level, player, enemies):
+    def __init__(self, dim, level, player, enemies, walls):
 
         self.level_complete = False
 
@@ -30,6 +30,7 @@ class GameView:
         # player setup
         self.player = turtle.Turtle()
         p = self.player
+        p.id = "player_0"
         p.alive = True
         p.speed(0)
         p.shape("turtle")
@@ -67,6 +68,19 @@ class GameView:
         # missiles setup
         self.missiles = dict()
         self.enemy_missiles = dict()
+
+        # wall setup
+        self.walls = dict()
+        for wall_id, wall in enumerate(walls):
+            w = turtle.Turtle()
+            w.id = "wall_" + str(wall_id)
+            w.shape(wall.shape)
+            w.color(wall.color)
+            w.penup()
+            w.goto(wall.pos[0], wall.pos[1])
+            w.direction = STOP
+            w.wall_unit_data = wall
+            self.walls[w.id] = w
 
         # event listener setup
         win.listen()
@@ -156,13 +170,22 @@ class GameView:
             m.right(skill.spin)
 
             # collision on enemy or wall, TODO: wall
-            enemy_hit = find_first_collision(m, self.enemies, (x, y))
-            if enemy_hit is not None:
-                dead = handle_missile_damage(enemy_hit, m)
-                # enemy_hit.hideturtle()
-                if dead:
-                    del self.enemies[enemy_hit.id]
-                    print("{} is down, {} left.".format(enemy_hit.id, str(len(self.enemies))))
+            obj_hit = find_first_collision(m, combine_map(self.enemies, self.walls), (x, y))
+            if obj_hit is not None:
+                if "enemy_" in obj_hit.id:
+                    print("hit enemy")
+                    enemy_hit = obj_hit
+                    dead = handle_missile_damage(enemy_hit, m)
+                    if dead:
+                        del self.enemies[enemy_hit.id]
+                        print("{} is down, {} left.".format(enemy_hit.id, str(len(self.enemies))))
+                elif "wall_" in obj_hit.id:
+                    print("hit wall")
+                    wall_hit = obj_hit
+                    dead = handle_missile_damage_on_wall(wall_hit, m)
+                    if dead:
+                        del self.walls[wall_hit.id]
+                        print("{} is down.".format(wall_hit.id))
                 m.ttl = 0
             elif math.sqrt(dx * dx + dy * dy) >= skill.attack_range:
                 m.ttl = 0
@@ -181,12 +204,23 @@ class GameView:
             m.right(skill.spin)
 
             # collision on enemy or wall, TODO: wall
-            bu_hit = find_first_collision(m, {"player": self.player}, (x, y))
-            if bu_hit is not None:
-                dead = handle_missile_damage(bu_hit, m)
-                if dead:
-                    self.player.alive = False
-                    print("Player down.")
+            obj_hit = find_first_collision(m, combine_map({p.id: p}, self.walls), (x, y))
+            if obj_hit is not None:
+                if "player_" in obj_hit.id:
+                    print("hit player")
+                    player_hit = obj_hit
+                    dead = handle_missile_damage(player_hit, m)
+                    if dead:
+                        self.player.alive = False
+                        print("Player down.")
+                elif "wall_" in obj_hit.id:
+                    print("hit wall")
+                    wall_hit = obj_hit
+                    dead = handle_missile_damage_on_wall(wall_hit, m)
+                    if dead:
+                        del self.walls[wall_hit.id]
+                        print("{} is down.".format(wall_hit.id))
+
                 m.ttl = 0
             elif math.sqrt(dx * dx + dy * dy) >= skill.attack_range:
                 m.ttl = 0
@@ -222,8 +256,9 @@ class CasualGame:
         for level in range(MIN_LEVEL, MAX_LEVEL+1):
             self.player = get_player_by_level(level)
             self.enemies = get_enemies_by_level(level, self.player)
+            self.walls = get_walls_by_level(level)
             print("Initiating level {}".format(str(level)))
-            self.view = GameView(self.dim, level, self.player, self.enemies)
+            self.view = GameView(self.dim, level, self.player, self.enemies, self.walls)
             if not self.view.level_complete:
                 print("level {} failed, game over.".format(str(level)))
                 break

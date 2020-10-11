@@ -111,15 +111,19 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
             return t
 
         # if missile collides with enemy's prev position, also count as valid collision
-        tx, ty = t.prev_pos
-        a = get_dist((tx, ty), (ox, oy))
-        b = get_dist((tx, ty), (nx, ny))
-        # handle too-close case, regardless of direction
-        if min(a, b) < min_collision_dist:
-            return t
-        aa, bb, cc = a * a, b * b, c * c
-        if cc + aa > bb and cc + bb > aa and get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "prev") <= min_collision_dist:
-            return t
+        if hasattr(t, "prev_pos"):
+            tx, ty = t.prev_pos
+            a = get_dist((tx, ty), (ox, oy))
+            b = get_dist((tx, ty), (nx, ny))
+            # handle too-close case, regardless of direction
+            if min(a, b) < min_collision_dist:
+                return t
+            aa, bb, cc = a * a, b * b, c * c
+            if cc + aa > bb and cc + bb > aa and get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "prev") <= min_collision_dist:
+                return t
+        # walls don't have prev pos, so no need to do this.
+        else:
+            pass
 
     return None
 
@@ -131,18 +135,34 @@ def get_shape_size(health):
 def handle_missile_damage(battle_unit, missile):
     bu, m = battle_unit, missile
     damage = max(0, m.owner.battle_unit_data.attack * m.skill_data.conversion - bu.battle_unit_data.defense)
-    health = battle_unit.battle_unit_data.health
+    health = bu.battle_unit_data.health
     print("attack = {}, conversion = {}, defense = {}, damage = {}, health = {}".format(
         str(m.owner.battle_unit_data.attack), str(m.skill_data.conversion), str(bu.battle_unit_data.defense), str(damage), str(health)))
     health = max(0, health - damage)
     print("health after = " + str(health))
-    battle_unit.battle_unit_data.health = health
+    bu.battle_unit_data.health = health
     if health == 0:
-        battle_unit.hideturtle()
+        bu.hideturtle()
         return True
     else:
-        battle_unit.shapesize(get_shape_size(health))
-        battle_unit.battle_unit_data.add_effects(m.skill_data.effects)
+        bu.shapesize(get_shape_size(health))
+        bu.battle_unit_data.add_effects(m.skill_data.effects)
+        return False
+
+
+def handle_missile_damage_on_wall(wall_unit, missile):
+    wu, m = wall_unit, missile
+    damage = max(0, m.owner.battle_unit_data.attack * m.skill_data.conversion - wu.wall_unit_data.defense)
+    health = wu.wall_unit_data.health
+    print("attack = {}, conversion = {}, defense = {}, damage = {}, health = {}".format(
+        str(m.owner.battle_unit_data.attack), str(m.skill_data.conversion), str(wu.wall_unit_data.defense), str(damage), str(health)))
+    health = max(0, health - damage)
+    print("health after = " + str(health))
+    wu.wall_unit_data.health = health
+    if health == 0:
+        wu.hideturtle()
+        return True
+    else:
         return False
 
 
@@ -194,3 +214,12 @@ def fire_missile(attacker, target_cor, missile_list):
     missile_list[m.id] = m
 
     return True
+
+
+def combine_map(m1, m2):
+    m = dict()
+    for k, v in m1.items():
+        m[deepcopy(k)] = v
+    for k, v in m2.items():
+        m[deepcopy(k)] = v
+    return m

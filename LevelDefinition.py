@@ -1,5 +1,6 @@
 from BattleUnitDefinition import *
 from SkillDefinition import *
+from WallUnitDefinition import *
 
 MIN_LEVEL = 1
 MAX_LEVEL = 3
@@ -47,3 +48,34 @@ def get_enemies_by_level(level, player):
         ]
     else:
         raise "level %s enemy list is not defined.".format(str(level))
+
+
+def get_walls_by_level(level):
+    validate_level(level)
+    if level == 1:
+        return [
+            BrickWallUnit(pos=(70, 40)),
+            BrickWallUnit(pos=(70, 20)),
+            BrickWallUnit(pos=(70, 0)),
+            BrickWallUnit(pos=(70, -20)),
+            BrickWallUnit(pos=(70, -40)),
+        ]
+    elif level == 2:
+
+        return [
+            BrickWallUnit(pos=(70, 40)),
+            BrickWallUnit(pos=(70, 20)),
+            BrickWallUnit(pos=(70, 0)),
+            BrickWallUnit(pos=(70, -20)),
+            BrickWallUnit(pos=(70, -40)),
+        ]
+    elif level == 3:
+        return [
+            BrickWallUnit(pos=(70, 40)),
+            BrickWallUnit(pos=(70, 20)),
+            BrickWallUnit(pos=(70, 0)),
+            BrickWallUnit(pos=(70, -20)),
+            BrickWallUnit(pos=(70, -40)),
+        ]
+    else:
+        raise "level %s wall list is not defined.".format(str(level))
