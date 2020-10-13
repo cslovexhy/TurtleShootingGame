@@ -136,14 +136,18 @@ class GameView:
         # move player
         p = self.player
         x, y, moving_angle = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.battle_unit_data.speed, True)
-        # print("angle = " + str(angle))
-        p.prev_pos = (p.xcor(), p.ycor())
-        p.goto(x, y)
-        # print("[1] set p angle = " + str(moving_angle))
-        if p.stop:
-            p.setheading(p.shooting_angle)
+        obj_hit = find_first_collision(p, self.walls, (x, y))
+        if obj_hit is None:
+            p.prev_pos = (p.xcor(), p.ycor())
+            p.goto(x, y)
+            # print("[1] set p angle = " + str(moving_angle))
+            if p.stop:
+                p.setheading(p.shooting_angle)
+            else:
+                p.setheading(moving_angle)
         else:
-            p.setheading(moving_angle)
+            # print("player hit a wall, cannot go")
+            p.stop = True
 
         # enemy ai actions
         for e_id, e in self.enemies.items():
@@ -154,9 +158,14 @@ class GameView:
                 self.enemy_attack(e, target_cor)
             elif decision['decision'] == AI_DECISION_MOVE:
                 next_x, next_y, angle = decision['next_stop']
-                e.prev_pos = (e.xcor(), e.ycor())
-                e.goto(next_x, next_y)
-                e.setheading(angle)
+                obj_hit = find_first_collision(e, self.walls, (next_x, next_y))
+                if obj_hit is None:
+                    e.prev_pos = (e.xcor(), e.ycor())
+                    e.goto(next_x, next_y)
+                    e.setheading(angle)
+                else:
+                    # enemy hit a wall
+                    pass
 
         # move player missiles
         for m_id, m in self.missiles.items():

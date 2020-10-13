@@ -53,29 +53,10 @@ def get_enemies_by_level(level, player):
 def get_walls_by_level(level):
     validate_level(level)
     if level == 1:
-        return [
-            BrickWallUnit(pos=(70, 40)),
-            BrickWallUnit(pos=(70, 20)),
-            BrickWallUnit(pos=(70, 0)),
-            BrickWallUnit(pos=(70, -20)),
-            BrickWallUnit(pos=(70, -40)),
-        ]
+        return get_walls_from_layout(WALL_LAY_OUT_LEVEL_1)
     elif level == 2:
-
-        return [
-            BrickWallUnit(pos=(70, 40)),
-            BrickWallUnit(pos=(70, 20)),
-            BrickWallUnit(pos=(70, 0)),
-            BrickWallUnit(pos=(70, -20)),
-            BrickWallUnit(pos=(70, -40)),
-        ]
+        return get_walls_from_layout(WALL_LAY_OUT_LEVEL_1)
     elif level == 3:
-        return [
-            BrickWallUnit(pos=(70, 40)),
-            BrickWallUnit(pos=(70, 20)),
-            BrickWallUnit(pos=(70, 0)),
-            BrickWallUnit(pos=(70, -20)),
-            BrickWallUnit(pos=(70, -40)),
-        ]
+        return get_walls_from_layout(WALL_LAY_OUT_LEVEL_1)
     else:
         raise "level %s wall list is not defined.".format(str(level))

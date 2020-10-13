@@ -38,7 +38,7 @@ class BattleUnit:
 
 
 class PlayerUnit(BattleUnit):
-    def __init__(self, start_pos=(0, 0), health=STANDARD_HEALTH, attack=20, defense=3, speed=1.2, skills=None):
+    def __init__(self, start_pos=(-200, 0), health=STANDARD_HEALTH, attack=20, defense=3, speed=1.2, skills=None):
         if skills is None:
             skills = [skill_fire_ball]
         assert len(skills) >= 1
