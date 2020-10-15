@@ -173,21 +173,16 @@ class GameView:
 
         # enemy ai actions
         for e_id, e in self.enemies.items():
-            decision = e.battle_unit_data.ai.decide2(self.walls_cor_set)
+            decision = e.battle_unit_data.ai.decide(self.walls_cor_set)
             # print("decision for enemy {} is: {}".format(str(e_id), str(decision)))
             if decision['decision'] == AI_DECISION_ATTACK:
                 target_cor = decision['target_cor']
                 self.enemy_attack(e, target_cor)
             elif decision['decision'] == AI_DECISION_MOVE:
                 next_x, next_y, angle = decision['next_stop']
-                obj_hit = find_first_collision(e, self.walls, (next_x, next_y))
-                if obj_hit is None:
-                    e.prev_pos = (e.xcor(), e.ycor())
-                    e.goto(next_x, next_y)
-                    e.setheading(angle)
-                else:
-                    # enemy hit a wall
-                    pass
+                e.prev_pos = (e.xcor(), e.ycor())
+                e.goto(next_x, next_y)
+                e.setheading(angle)
 
         # move player missiles
         for m_id, m in self.missiles.items():
@@ -200,7 +195,7 @@ class GameView:
             dx, dy = x - orig_x, y - orig_y
             m.right(skill.spin)
 
-            # collision on enemy or wall, TODO: wall
+            # collision on enemy or wall
             obj_hit = find_first_collision(m, combine_map(self.enemies, self.walls), (x, y))
             if obj_hit is not None:
                 if "enemy_" in obj_hit.id:

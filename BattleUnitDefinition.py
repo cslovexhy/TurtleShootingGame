@@ -38,7 +38,7 @@ class BattleUnit:
 
 
 class PlayerUnit(BattleUnit):
-    def __init__(self, start_pos=(-200, 0), health=STANDARD_HEALTH, attack=20, defense=3, speed=3.0, skills=None):
+    def __init__(self, start_pos=(-200, 0), health=STANDARD_HEALTH, attack=20, defense=3, speed=2.0, skills=None):
         if skills is None:
             skills = [skill_fire_ball]
         assert len(skills) >= 1
@@ -51,7 +51,7 @@ class PlayerUnit(BattleUnit):
 
 
 class EnemyUnit(BattleUnit):
-    def __init__(self, start_pos, health, attack, defense, player, ai_mode=ENFORCER, speed=.5, skills=None):
+    def __init__(self, start_pos, health, attack, defense, player, ai_mode=ENFORCER, speed=1.0, skills=None):
         if skills is None:
             skills = get_skill_list_by_mode(ai_mode)
         assert len(skills) >= 1

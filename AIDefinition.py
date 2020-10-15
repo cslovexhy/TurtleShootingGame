@@ -10,15 +10,17 @@ class AI:
         self.battle_unit = battle_unit
         self.target_unit = target_unit
 
-    def decide2(self, walls_cor_set):
+    def decide(self, walls_cor_set):
         if self.ai_mode == ENFORCER:
             t = self.target_unit.ui
             tx, ty = t.xcor(), t.ycor()
             b = self.battle_unit.ui
             bx, by = b.xcor(), b.ycor()
             skill = self.battle_unit.skills['3']
-            # if dist < skill.attack_range and skill.is_ready(): # this is not-so-hardcore version...
-            if skill.is_ready():
+            # this is not-so-hardcore version...
+            if get_dist((bx, by), (tx, ty)) < skill.attack_range and skill.is_ready():
+            # enabling this, enemy will take down brick walls
+            # if skill.is_ready():
                 return {"decision": AI_DECISION_ATTACK, "skill": skill, "target_cor": (tx, ty)}
             else:
                 if hasattr(b, "way_point_ttl") and time.time() < b.way_point_ttl:
@@ -36,7 +38,7 @@ class AI:
                 b.orig_pos = (bx, by)
                 if not b.way_points:
                     # print("no way point, b.target_pos = {}".format(str(b.target_pos)))
-                    b.target_pos = (tx, ty)
+                    pass
                 else:
                     # print("has way point, next one = {}".format(str(b.way_points[-1])))
                     b.target_pos = deepcopy(b.way_points[-1])
@@ -45,26 +47,6 @@ class AI:
                 # print("next stop = {}".format(str(next_stop)))
 
                 return {"decision": AI_DECISION_MOVE, "next_stop": next_stop}
-        else:
-            raise Exception("ai_mode {} is not supported yet".format(self.ai_mode))
-
-    def decide(self):
-        if self.ai_mode == ENFORCER:
-            t = self.target_unit.ui
-            tx, ty = t.xcor(), t.ycor()
-            b = self.battle_unit.ui
-            bx, by = b.xcor(), b.ycor()
-            dist = get_dist((tx, ty), (bx, by))
-            max_step = BATTLE_UNIT_BASE_SPEED * self.battle_unit.get_speed()
-            skill = self.battle_unit.skills['3']
-            # print("e_id = {}, dist = {}, range = {}".format(str(b.id), str(dist), str(skill.attack_range)))
-            # if dist < skill.attack_range and skill.is_ready(): # this is not-so-hardcore version...
-            if skill.is_ready():
-                return {"decision": AI_DECISION_ATTACK, "skill": skill, "target_cor": (tx, ty)}
-            else:
-                b.orig_pos = (bx, by)
-                b.target_pos = (tx, ty)
-                return {"decision": AI_DECISION_MOVE, "next_stop": get_new_cors(b, max_step)}
         else:
             raise Exception("ai_mode {} is not supported yet".format(self.ai_mode))
 

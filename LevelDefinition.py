@@ -38,13 +38,13 @@ def get_enemies_by_level(level, player):
         ]
     elif level == 3:
         return [
-            EnemyUnit(start_pos=(100, 100), health=20, attack=5, defense=2, player=player, speed=.5),
-            EnemyUnit(start_pos=(100, 0), health=30, attack=5, defense=3, player=player, speed=.55),
-            EnemyUnit(start_pos=(100, -100), health=50, attack=7, defense=2, player=player, speed=.6),
-            EnemyUnit(start_pos=(100, -200), health=50, attack=7, defense=2, player=player, speed=.65),
-            EnemyUnit(start_pos=(100, 200), health=50, attack=7, defense=2, player=player, speed=.7),
-            EnemyUnit(start_pos=(200, 0), health=50, attack=7, defense=2, player=player, speed=.75),
-            EnemyUnit(start_pos=(300, 0), health=50, attack=7, defense=2, player=player, speed=.8),
+            EnemyUnit(start_pos=(100, 100), health=20, attack=5, defense=2, player=player, speed=1.0),
+            EnemyUnit(start_pos=(100, 0), health=30, attack=5, defense=3, player=player, speed=1.1),
+            EnemyUnit(start_pos=(100, -100), health=50, attack=7, defense=2, player=player, speed=1.2),
+            EnemyUnit(start_pos=(100, -200), health=50, attack=7, defense=2, player=player, speed=0.9),
+            EnemyUnit(start_pos=(100, 200), health=50, attack=7, defense=2, player=player, speed=0.8),
+            EnemyUnit(start_pos=(200, 0), health=50, attack=7, defense=2, player=player, speed=1.5),
+            EnemyUnit(start_pos=(300, 0), health=50, attack=7, defense=2, player=player, speed=1.6),
         ]
     else:
         raise "level %s enemy list is not defined.".format(str(level))

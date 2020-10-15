@@ -227,15 +227,16 @@ def fire_missile(attacker, target_cor, missile_list):
 def combine_map(m1, m2):
     m = dict()
     for k, v in m1.items():
-        m[deepcopy(k)] = v
+        m[k] = v
     for k, v in m2.items():
-        m[deepcopy(k)] = v
+        m[k] = v
     return m
 
 
 def find_path(a, b, blocks):
     cost_hp = [(0, a, None)]
     visited = {a: (None, 0)}
+    closest = [a, get_dist(a, b)]
     while cost_hp:
         if b in visited:
             break
@@ -254,22 +255,28 @@ def find_path(a, b, blocks):
                 if (new_x, y) in blocks or (x, new_y) in blocks:
                     continue
                 new_cost = visited[cor][1] + get_dist(cor, new_cor)
-                if new_cor not in visited or visited[new_cor][1] > new_cost:
-                    visited[new_cor] = (cor, new_cost)
-                else:
+                if new_cor in visited and visited[new_cor][1] <= new_cost:
                     continue
+                visited[new_cor] = (cor, new_cost)
                 heapq.heappush(cost_hp, (new_cost, new_cor, cor))
+                dist = get_dist(new_cor, b)
+                if dist < closest[1]:
+                    closest = [new_cor, dist]
+
+    def back_trace(p):
+        result = []
+        while p is not None:
+            result.append(p)
+            p = visited[p][0]
+        return result
 
     if b not in visited:
-        return False, []
+        print("not reachable, go to closest point {}".format(str(closest[0])))
+        res = back_trace(closest[0])
+        return False, res[::-1]
 
-    p = b
-    result = []
-    while p is not None:
-        result.append(p)
-        p = visited[p][0]
-
-    return True, result[::-1]
+    res = back_trace(b)
+    return True, res[::-1]
 
 
 # from a to b, considering walls cannot be passed
@@ -288,22 +295,18 @@ def get_way_points(a, b, walls_cor_set):
     # print("walls = {}".format(str(walls_cor_set)))
 
     # a and b maybe double added, but should be ok.
-    if new_a != a:
-        result.append(a)
-
     valid, path = find_path(new_a, new_b, walls_cor_set)
 
-    if not valid:
-        # print("No valid path")
-        return []
-
-    result.extend(path)
-
-    if b != new_b:
+    if valid:  # not valid means we do not go to destination, rather we go to one of the closest points
+        result.append(a)
+        result.extend(path[1:-1])
         result.append(b)
+    else:
+        result.append(a)
+        result.extend(path[1:])
 
     result = result[::-1]
 
-    # print("way points = {}".format(str(result)))
+    print("way points = {}".format(str(result)))
 
     return result
