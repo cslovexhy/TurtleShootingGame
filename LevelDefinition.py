@@ -42,9 +42,9 @@ def get_enemies_by_level(level, player):
             EnemyUnit(start_pos=(100, 0), health=30, attack=5, defense=3, player=player, speed=.55),
             EnemyUnit(start_pos=(100, -100), health=50, attack=7, defense=2, player=player, speed=.6),
             EnemyUnit(start_pos=(100, -200), health=50, attack=7, defense=2, player=player, speed=.65),
-            EnemyUnit(start_pos=(100, -300), health=50, attack=7, defense=2, player=player, speed=.7),
-            EnemyUnit(start_pos=(100, -400), health=50, attack=7, defense=2, player=player, speed=.75),
-            EnemyUnit(start_pos=(100, -500), health=50, attack=7, defense=2, player=player, speed=.8),
+            EnemyUnit(start_pos=(100, 200), health=50, attack=7, defense=2, player=player, speed=.7),
+            EnemyUnit(start_pos=(200, 0), health=50, attack=7, defense=2, player=player, speed=.75),
+            EnemyUnit(start_pos=(300, 0), health=50, attack=7, defense=2, player=player, speed=.8),
         ]
     else:
         raise "level %s enemy list is not defined.".format(str(level))

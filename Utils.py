@@ -26,7 +26,7 @@ def get_new_cors(t, dist, hard_stop=False):
     assert hasattr(t, "orig_pos")
 
     if t.target_pos == t.orig_pos:
-        return t.orig_pos[0], t.orig_pos[0], t.heading()
+        return t.orig_pos[0], t.orig_pos[1], t.heading()
 
     # orig turtle pos and target turtle pos decides the direction, has nothing to do with current turtle pos
     ox, oy = t.orig_pos
@@ -62,9 +62,9 @@ def get_dist_dot_to_line(dot, line_dot_1, line_dot_2, id, msg):
     x1, y1 = line_dot_1
     x2, y2 = line_dot_2
     if x1 == x2:
-        a, b, c = 0, 1, -y1
-    elif y1 == y2:
         a, b, c = 1, 0, -x1
+    elif y1 == y2:
+        a, b, c = 0, 1, -y1
     else:
         # y = kx + z =>
         # kx - y + b = 0 =>
@@ -90,6 +90,7 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
 
     ox, oy = moving_obj.xcor(), moving_obj.ycor()
     nx, ny = new_cors
+    # print("ox, oy = ({}, {})  nx, ny = ({}, {})".format(str(ox), str(oy), str(nx), str(ny)))
     while target_min_heap:
         dist, t_id = heapq.heappop(target_min_heap)
         t = potential_target_map[t_id]
@@ -103,11 +104,16 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
         b = get_dist((tx, ty), (nx, ny))
         # handle too-close case, regardless of direction
         if min(a, b) < min_collision_dist:
+            # print("return 1")
             return t
         # here need to make sure dot to line dist (line) falls on the line segment
         # this is guaranteed by making sure angles from both ends of the line segment < 90 degrees
         aa, bb, cc = a * a, b * b, c * c
         if cc + aa > bb and cc + bb > aa and get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "curr") <= min_collision_dist:
+            print("tx, ty = ({}, {}), a = {}, b = {}, c = {}, aa = {}, bb = {}, cc = {}, dist_dot_to_line = {}, min_collision_dist = {}".format(
+                str(tx), str(ty), str(a), str(b), str(c), str(aa), str(bb), str(cc), str(get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "curr")), str(min_collision_dist)
+            ))
+            # print("return 2")
             return t
 
         # if missile collides with enemy's prev position, also count as valid collision
@@ -117,9 +123,11 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
             b = get_dist((tx, ty), (nx, ny))
             # handle too-close case, regardless of direction
             if min(a, b) < min_collision_dist:
+                # print("return 3")
                 return t
             aa, bb, cc = a * a, b * b, c * c
             if cc + aa > bb and cc + bb > aa and get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "prev") <= min_collision_dist:
+                # print("return 4")
                 return t
         # walls don't have prev pos, so no need to do this.
         else:
@@ -223,3 +231,79 @@ def combine_map(m1, m2):
     for k, v in m2.items():
         m[deepcopy(k)] = v
     return m
+
+
+def find_path(a, b, blocks):
+    cost_hp = [(0, a, None)]
+    visited = {a: (None, 0)}
+    while cost_hp:
+        if b in visited:
+            break
+        cost, cor, prev = heapq.heappop(cost_hp)
+        x, y = cor
+        for dx in (-20, 0, 20):
+            for dy in (-20, 0, 20):
+                new_x, new_y = x + dx, y + dy
+                new_cor = (new_x, new_y)
+                # if visited or hit a wall, continue
+                if new_cor in blocks:
+                    continue
+                # if diagonal a -> b step got blocked by something like below, continue
+                # a x  or  a x  or  a +
+                # x b      + b      x b
+                if (new_x, y) in blocks or (x, new_y) in blocks:
+                    continue
+                new_cost = visited[cor][1] + get_dist(cor, new_cor)
+                if new_cor not in visited or visited[new_cor][1] > new_cost:
+                    visited[new_cor] = (cor, new_cost)
+                else:
+                    continue
+                heapq.heappush(cost_hp, (new_cost, new_cor, cor))
+
+    if b not in visited:
+        return False, []
+
+    p = b
+    result = []
+    while p is not None:
+        result.append(p)
+        p = visited[p][0]
+
+    return True, result[::-1]
+
+
+# from a to b, considering walls cannot be passed
+def get_way_points(a, b, walls_cor_set):
+    result = []
+
+    def to_way_point(cor):
+        x, y = cor
+        new_cor = (round((x - 10) / 20) * 20 + 10, round((y - 10) / 20) * 20 + 10)
+        return new_cor
+
+    new_a = to_way_point(a)
+    new_b = to_way_point(b)
+
+    # print("a = {}, new_a = {}, b = {}, new_b = {}".format(str(a), str(new_a), str(b), str(new_b)))
+    # print("walls = {}".format(str(walls_cor_set)))
+
+    # a and b maybe double added, but should be ok.
+    if new_a != a:
+        result.append(a)
+
+    valid, path = find_path(new_a, new_b, walls_cor_set)
+
+    if not valid:
+        # print("No valid path")
+        return []
+
+    result.extend(path)
+
+    if b != new_b:
+        result.append(b)
+
+    result = result[::-1]
+
+    # print("way points = {}".format(str(result)))
+
+    return result

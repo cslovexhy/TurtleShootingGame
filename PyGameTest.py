@@ -71,6 +71,7 @@ class GameView:
 
         # wall setup
         self.walls = dict()
+        self.walls_cor_set = set()
         for wall_id, wall in enumerate(walls):
             w = turtle.Turtle()
             w.id = "wall_" + str(wall_id)
@@ -81,6 +82,7 @@ class GameView:
             w.direction = STOP
             w.wall_unit_data = wall
             self.walls[w.id] = w
+            self.walls_cor_set.add(wall.pos)
 
         # event listener setup
         win.listen()
@@ -122,7 +124,15 @@ class GameView:
     def move_with_left_click(self, target_x, target_y):
         p = self.player
         p.orig_pos = (p.xcor(), p.ycor())
+
+        # use way point for player, less control and less fun
+        # p.way_points = get_way_points(p.orig_pos, (target_x, target_y), self.walls_cor_set)
+        # if p.way_points:
+        #     p.target_pos = deepcopy(p.way_points[-1])
+        #     print("target pos updated: " + str(p.target_pos))
+        #     p.stop = False
         p.target_pos = (target_x, target_y)
+        print("target pos updated: " + str(p.target_pos))
         p.stop = False
 
     def attack_with_right_click(self, target_x, target_y):
@@ -136,6 +146,7 @@ class GameView:
         # move player
         p = self.player
         x, y, moving_angle = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.battle_unit_data.speed, True)
+        # print("x = {}, y = {}, moving_angle = {}".format(str(x), str(y), str(moving_angle)))
         obj_hit = find_first_collision(p, self.walls, (x, y))
         if obj_hit is None:
             p.prev_pos = (p.xcor(), p.ycor())
@@ -145,13 +156,24 @@ class GameView:
                 p.setheading(p.shooting_angle)
             else:
                 p.setheading(moving_angle)
+            # this won't happen unless we enable path find for player in move_with_left_click
+            if hasattr(p, "way_points"):
+                if p.way_points:
+                    if (p.xcor(), p.ycor()) == p.way_points[-1]:
+                        p.way_points.pop()
+                        if p.way_points:
+                            p.orig_pos = (p.xcor(), p.ycor())
+                            p.target_pos = deepcopy(p.way_points[-1])
+                            print("target pos updated 2: " + str(p.target_pos))
         else:
-            # print("player hit a wall, cannot go")
+            # print("player hit a wall, cannot go, pos = ({}, {}) obj = {}".format(str(p.xcor()), str(p.ycor()), str(obj_hit.wall_unit_data.pos)))
+            # print("target pos 3: " + str(p.target_pos))
+            # print("orig pos 3: " + str(p.orig_pos))
             p.stop = True
 
         # enemy ai actions
         for e_id, e in self.enemies.items():
-            decision = e.battle_unit_data.ai.decide()
+            decision = e.battle_unit_data.ai.decide2(self.walls_cor_set)
             # print("decision for enemy {} is: {}".format(str(e_id), str(decision)))
             if decision['decision'] == AI_DECISION_ATTACK:
                 target_cor = decision['target_cor']
@@ -193,6 +215,7 @@ class GameView:
                     wall_hit = obj_hit
                     dead = handle_missile_damage_on_wall(wall_hit, m)
                     if dead:
+                        self.walls_cor_set.remove(self.walls[wall_hit.id].wall_unit_data.pos)
                         del self.walls[wall_hit.id]
                         print("{} is down.".format(wall_hit.id))
                 m.ttl = 0
@@ -227,6 +250,7 @@ class GameView:
                     wall_hit = obj_hit
                     dead = handle_missile_damage_on_wall(wall_hit, m)
                     if dead:
+                        self.walls_cor_set.remove(self.walls[wall_hit.id].wall_unit_data.pos)
                         del self.walls[wall_hit.id]
                         print("{} is down.".format(wall_hit.id))
 
