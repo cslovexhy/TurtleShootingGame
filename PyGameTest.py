@@ -21,7 +21,7 @@ class GameView:
         self.win = turtle.Screen()
         win = self.win
         win.title("Small game, level {}".format(str(level)))
-        win.bgcolor(COLOR_BG)
+        win.bgcolor(BLACK)
         win.setup(width=dim[0], height=dim[1])
         win.tracer(0)
         if hasattr(win, "ttl"):
@@ -34,7 +34,7 @@ class GameView:
         p.alive = True
         p.speed(0)
         p.shape("turtle")
-        p.color(COLOR_PLAYER)
+        p.color(player.color)
         p.penup()
         p.goto(player.start_pos[0], player.start_pos[1])
         p.prev_pos = deepcopy(player.start_pos)
@@ -53,7 +53,7 @@ class GameView:
             e = turtle.Turtle()
             e.id = "enemy_" + str(enemy_id)
             e.shape("turtle")
-            e.color(COLOR_ENEMY)
+            e.color(enemy.color)
             e.penup()
             e.goto(enemy.start_pos[0], enemy.start_pos[1])
             e.prev_pos = deepcopy(enemy.start_pos)
@@ -145,7 +145,7 @@ class GameView:
     def tick(self):
         # move player
         p = self.player
-        x, y, moving_angle = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.battle_unit_data.speed, True)
+        x, y, moving_angle = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.battle_unit_data.get_speed(), True)
         # print("x = {}, y = {}, moving_angle = {}".format(str(x), str(y), str(moving_angle)))
         obj_hit = find_first_collision(p, self.walls, (x, y))
         if obj_hit is None:

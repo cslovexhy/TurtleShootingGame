@@ -271,7 +271,7 @@ def find_path(a, b, blocks):
         return result
 
     if b not in visited:
-        print("not reachable, go to closest point {}".format(str(closest[0])))
+        # print("not reachable, go to closest point {}".format(str(closest[0])))
         res = back_trace(closest[0])
         return False, res[::-1]
 
@@ -306,7 +306,5 @@ def get_way_points(a, b, walls_cor_set):
         result.extend(path[1:])
 
     result = result[::-1]
-
-    print("way points = {}".format(str(result)))
-
+    # print("way points = {}".format(str(result)))
     return result

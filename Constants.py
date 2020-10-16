@@ -1,11 +1,8 @@
 WINDOW_X, WINDOW_Y = 800, 600
 FRAME = 24
-MIN_SHAPE_PCT = 20
+MIN_SHAPE_PCT = 40
 STANDARD_HEALTH = 100
 SLEEP_INTERVAL = 1 / FRAME
-COLOR_BG = (.8, .8, .8)  # gray
-COLOR_PLAYER = (1, 0, 0)  # red
-COLOR_ENEMY = (0, 1, 0)
 UP, DOWN, RIGHT, LEFT, STOP = "up", "down", "right", "left", "stop"
 BATTLE_UNIT_BASE_SPEED = 50 / FRAME      # 50 pixel per second
 MISSILE_BASE_SPEED = 200 / FRAME    # 200 pixel per second

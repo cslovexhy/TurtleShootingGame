@@ -16,7 +16,7 @@ class AI:
             tx, ty = t.xcor(), t.ycor()
             b = self.battle_unit.ui
             bx, by = b.xcor(), b.ycor()
-            skill = self.battle_unit.skills['3']
+            skill = next(iter(self.battle_unit.skills.values()))
             # this is not-so-hardcore version...
             if get_dist((bx, by), (tx, ty)) < skill.attack_range and skill.is_ready():
             # enabling this, enemy will take down brick walls

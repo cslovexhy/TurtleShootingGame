@@ -1,5 +1,6 @@
 import time
 from copy import deepcopy
+from ColorDefinition import *
 
 EFFECT_SLOW_MOVEMENT = "EFFECT_SLOW_MOVEMENT"
 EFFECT_SLOW_ATTACK = "EFFECT_SLOW_ATTACK"
@@ -58,7 +59,7 @@ skill_fire_ball = SimpleRangedSkill(
     conversion=0.7,
     cool_down=1,
     shape="circle",
-    color="red",
+    color=RED,
     spin=0
 )
 
@@ -70,18 +71,18 @@ skill_ice_ball = SimpleRangedSkill(
     conversion=0.5,
     cool_down=2,
     shape="square",
-    effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 5}},
-    color="blue",
+    effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5}},
+    color=BLUE,
     spin=20
 )
 
 skill_punch = SimpleRangedSkill(
     name="Punch",
     key='3',
-    attack_range=150,
+    attack_range=70,
     flying_speed=1,
     conversion=1,
-    cool_down=3,
+    cool_down=0.5,
     shape="triangle",
-    color="black"
+    color=PURPLE
 )
