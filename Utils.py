@@ -1,7 +1,19 @@
-import math, time, heapq
+import math, time, heapq, random
 import turtle
 from Constants import *
 from SkillDefinition import *
+
+
+def rand_f(f1, f2):
+    """
+    :param f1: start floating num, max precision is 4, e.g. 1.0001
+    :param f2: end floating num, same precision
+    :return: a random float number within [f1, f2]
+    """
+    assert(f1 <= f2)
+    f1 *= 10000
+    f2 *= 10000
+    return random.randint(int(f1), int(f2)) / 10000
 
 
 def to_int_degree(theta):

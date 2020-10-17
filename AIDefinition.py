@@ -32,7 +32,9 @@ class AI:
                     b.way_points = get_way_points((bx, by), (tx, ty), walls_cor_set)
                     # print("way point got: {}".format(str(b.way_points)))
                     if b.way_points:
-                        b.way_point_ttl = time.time() + 2.0
+                        # space out the path finding here for enemies
+                        # so calculation can be smoother across frames.
+                        b.way_point_ttl = time.time() + rand_f(2, 4)
                     else:
                         b.way_point_ttl = time.time() + 0.5
                 b.orig_pos = (bx, by)

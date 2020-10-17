@@ -281,7 +281,7 @@ class CasualGame:
     def __init__(self):
         self.dim = (WINDOW_X, WINDOW_Y)
 
-        for level in range(MIN_LEVEL, MAX_LEVEL+1):
+        for level in range(START_LEVEL, MAX_LEVEL+1):
             self.player = get_player_by_level(level)
             self.enemies = get_enemies_by_level(level, self.player)
             self.walls = get_walls_by_level(level)

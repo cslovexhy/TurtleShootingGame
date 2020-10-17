@@ -4,8 +4,11 @@ from WallUnitDefinition import *
 
 MIN_LEVEL = 1
 MAX_LEVEL = 3
+START_LEVEL = 3
 
 MAX_GAME_TIME = 3600
+
+assert(MIN_LEVEL <= START_LEVEL <= MAX_LEVEL)
 
 
 def validate_level(level):
