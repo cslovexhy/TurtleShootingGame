@@ -1,0 +1,10 @@
+- Enemy Visibility (done)
+    * Just like dungeon, chase player to death once player is on their radar. (done)
+    * [stretch goal] group alert scheme (we don't even have group defined yet) (sort of done, two ways of aggro: pull and hit)
+- Easier Player Enemy Placement (done)
+    * Add MapDefinition class and move WALL_LAY_OUT_LEVEL_1 in.
+    * Use 'P' for player and '0' - '9' for enemy to initialize player and enemies.
+- Design some interesting levels.
+
+Not sure:
+- Player visibility & Fog?

@@ -5,9 +5,12 @@ from copy import deepcopy
 
 
 class AI:
-    def __init__(self, ai_mode, battle_unit, target_unit):
+    def __init__(self, ai_mode, battle_unit, target_unit=None):
         self.ai_mode = ai_mode
         self.battle_unit = battle_unit
+        self.target_unit = target_unit
+
+    def set_target_unit(self, target_unit):
         self.target_unit = target_unit
 
     def decide(self, walls_cor_set):
@@ -27,6 +30,9 @@ class AI:
                     if b.way_points and (bx, by) == b.way_points[-1]:
                         # print("way point popped up")
                         b.way_points.pop()
+                        # don't make ai standing there waiting for ttl when it reaches destination before it
+                        if not b.way_points:
+                            b.way_point_ttl = 0
                 else:
                     # print("trying to get way point")
                     b.way_points = get_way_points((bx, by), (tx, ty), walls_cor_set)

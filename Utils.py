@@ -148,10 +148,6 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
     return None
 
 
-def get_shape_size(health):
-    return max(MIN_SHAPE_PCT/100, health/STANDARD_HEALTH)
-
-
 def handle_missile_damage(battle_unit, missile):
     bu, m = battle_unit, missile
     damage = max(0, m.owner.battle_unit_data.attack * m.skill_data.conversion - bu.battle_unit_data.defense)
@@ -165,7 +161,7 @@ def handle_missile_damage(battle_unit, missile):
         bu.hideturtle()
         return True
     else:
-        bu.shapesize(get_shape_size(health))
+        bu.shapesize(bu.battle_unit_data.get_shape_size())
         bu.battle_unit_data.add_effects(m.skill_data.effects)
         return False
 
@@ -320,3 +316,11 @@ def get_way_points(a, b, walls_cor_set):
     result = result[::-1]
     # print("way points = {}".format(str(result)))
     return result
+
+
+def get_units_within_range(unit_map, center, radius):
+    units = []
+    for _, unit in unit_map.items():
+        if get_dist((unit.xcor(), unit.ycor()), (center[0], center[1])) <= radius:
+            units.append(unit)
+    return units

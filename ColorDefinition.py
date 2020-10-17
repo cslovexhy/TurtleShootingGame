@@ -12,6 +12,7 @@ RED = normalize(255, 0, 0)
 PURPLE = normalize(148, 0, 211)
 BLUE = normalize(0, 0, 255)
 GREEN = normalize(0, 128, 0)
+DARK_GREEN = normalize(0, 64, 0)
 
 SILVER = normalize(216, 216, 216)
 CHOCOLATE = normalize(210, 105, 30)

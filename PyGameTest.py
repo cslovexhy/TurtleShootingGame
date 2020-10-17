@@ -22,7 +22,8 @@ class GameView:
         win = self.win
         win.title("Small game, level {}".format(str(level)))
         win.bgcolor(BLACK)
-        win.setup(width=dim[0], height=dim[1])
+        win.screensize(dim[0], dim[1])
+        win.setup(width=1.0, height=1.0, startx=None, starty=None)
         win.tracer(0)
         if hasattr(win, "ttl"):
             delattr(win, "ttl")
@@ -52,6 +53,7 @@ class GameView:
         for enemy_id, enemy in enumerate(enemies):
             e = turtle.Turtle()
             e.id = "enemy_" + str(enemy_id)
+            e.aggro = False
             e.shape("turtle")
             e.color(enemy.color)
             e.penup()
@@ -59,7 +61,7 @@ class GameView:
             e.prev_pos = deepcopy(enemy.start_pos)
             e.target_pos = deepcopy(enemy.start_pos)
             e.orig_pos = deepcopy(enemy.start_pos)
-            e.shapesize(get_shape_size(enemy.health))
+            e.shapesize(enemy.get_shape_size())
             e.direction = STOP
             e.battle_unit_data = enemy
             enemy.ui = e
@@ -173,6 +175,9 @@ class GameView:
 
         # enemy ai actions
         for e_id, e in self.enemies.items():
+            if not e.aggro:
+                e.aggro = e.distance(p.xcor(), p.ycor()) <= e.battle_unit_data.aggro_range
+                continue
             decision = e.battle_unit_data.ai.decide(self.walls_cor_set)
             # print("decision for enemy {} is: {}".format(str(e_id), str(decision)))
             if decision['decision'] == AI_DECISION_ATTACK:
@@ -202,6 +207,9 @@ class GameView:
                     print("hit enemy")
                     enemy_hit = obj_hit
                     dead = handle_missile_damage(enemy_hit, m)
+                    aggro_list = get_units_within_range(self.enemies, (enemy_hit.xcor(), enemy_hit.ycor()), AGGRO_RANGE_FOR_HIT)
+                    for unit in aggro_list:
+                        unit.aggro = True
                     if dead:
                         del self.enemies[enemy_hit.id]
                         print("{} is down, {} left.".format(enemy_hit.id, str(len(self.enemies))))
@@ -282,9 +290,7 @@ class CasualGame:
         self.dim = (WINDOW_X, WINDOW_Y)
 
         for level in range(START_LEVEL, MAX_LEVEL+1):
-            self.player = get_player_by_level(level)
-            self.enemies = get_enemies_by_level(level, self.player)
-            self.walls = get_walls_by_level(level)
+            self.player, self.enemies, self.walls = get_units_by_level(level)
             print("Initiating level {}".format(str(level)))
             self.view = GameView(self.dim, level, self.player, self.enemies, self.walls)
             if not self.view.level_complete:
