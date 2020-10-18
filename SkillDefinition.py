@@ -28,11 +28,20 @@ class Skill:
         self.last_used = 0
         self.effects = effects if effects is not None else dict()
 
+    def is_ready(self):
+        now = time.time()
+        return now - self.last_used > self.cool_down
+
 
 class SimpleRangedSkill(Skill):
     # conversion means how much % of attack goes into damage
-    def __init__(self, name, key, attack_range, flying_speed, conversion, cool_down, shape, color, effects=None, spin=30):
-        super().__init__(name, key, cool_down, effects)
+    def __init__(self, name, key, attack_range, flying_speed, conversion, cool_down, shape, color, effects=None, spin=0):
+        super().__init__(
+            name=name,
+            key=key,
+            cool_down=cool_down,
+            effects=effects
+        )
         self.flying_speed = flying_speed
         self.attack_range = attack_range
         self.conversion = conversion
@@ -40,15 +49,33 @@ class SimpleRangedSkill(Skill):
         self.color = color
         self.spin = spin
 
-    def is_ready(self):
-        now = time.time()
-        return now - self.last_used > self.cool_down
+
+class SimpleRangedSkillWithSplash(SimpleRangedSkill):
+    def __init__(self, name, key, attack_range, flying_speed, conversion, cool_down, shape, color, effects=None, spin=30, shard_count=3):
+        super().__init__(
+            name=name,
+            key=key,
+            attack_range=attack_range,
+            flying_speed=flying_speed,
+            conversion=conversion,
+            cool_down=cool_down,
+            shape=shape,
+            color=color,
+            effects=effects,
+            spin=spin
+        )
+        self.shard_count = shard_count
 
 
 def copy_effects_with_apply_time(effect):
     e = deepcopy(effect)
     e[EFFECT_KEY_APPLY_TIME] = time.time()
     return e
+
+
+def reassign_skill_keys(skills):
+    for i, s in enumerate(skills):
+        s.key = str(i+1)
 
 
 skill_fire_ball = SimpleRangedSkill(
@@ -60,7 +87,6 @@ skill_fire_ball = SimpleRangedSkill(
     cool_down=1,
     shape="circle",
     color=RED,
-    spin=0
 )
 
 skill_ice_ball = SimpleRangedSkill(
@@ -70,10 +96,9 @@ skill_ice_ball = SimpleRangedSkill(
     flying_speed=1.2,
     conversion=0.5,
     cool_down=2,
-    shape="square",
+    shape="circle",
     effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5}},
     color=BLUE,
-    spin=20
 )
 
 skill_punch = SimpleRangedSkill(
@@ -85,4 +110,30 @@ skill_punch = SimpleRangedSkill(
     cool_down=0.5,
     shape="triangle",
     color=PURPLE
+)
+
+skill_icy_blast = SimpleRangedSkillWithSplash(
+    name="Icy Blast",
+    key='4',
+    attack_range=300,
+    flying_speed=1.5,
+    conversion=0.8,
+    cool_down=.5,
+    shape='triangle',
+    color=BLUE,
+    effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5}},
+    spin=30
+)
+
+skill_icy_blast_shard = SimpleRangedSkill(
+    name="Icy Blast Shard",
+    key=None,
+    attack_range=50,
+    flying_speed=1.5,
+    conversion=0.45,
+    cool_down=None,
+    shape="triangle",
+    effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5}},
+    color=BLUE,
+    spin=30
 )

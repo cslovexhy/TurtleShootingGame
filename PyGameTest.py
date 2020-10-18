@@ -22,6 +22,7 @@ class GameView:
         win = self.win
         win.title("Small game, level {}".format(str(level)))
         win.bgcolor(BLACK)
+        # learned from here: https://stackoverflow.com/questions/34687998/turtle-screen-fullscreen-on-program-startup
         win.screensize(dim[0], dim[1])
         win.setup(width=1.0, height=1.0, startx=None, starty=None)
         win.tracer(0)
@@ -190,6 +191,7 @@ class GameView:
                 e.setheading(angle)
 
         # move player missiles
+        added_missile_shards = []
         for m_id, m in self.missiles.items():
             if not m.isvisible():
                 continue
@@ -207,6 +209,9 @@ class GameView:
                     print("hit enemy")
                     enemy_hit = obj_hit
                     dead = handle_missile_damage(enemy_hit, m)
+                    missile_shards = trigger_splash(p, enemy_hit, m)
+                    if missile_shards:
+                        added_missile_shards.extend(missile_shards)
                     aggro_list = get_units_within_range(self.enemies, (enemy_hit.xcor(), enemy_hit.ycor()), AGGRO_RANGE_FOR_HIT)
                     for unit in aggro_list:
                         unit.aggro = True
@@ -226,6 +231,11 @@ class GameView:
                 m.ttl = 0
 
             m.goto(x, y)
+
+        for m in added_missile_shards:
+            m_id = "missile_" + str(len(self.missiles))
+            m.id = m_id
+            self.missiles[m_id] = m
 
         # move enemy missiles
         for m_id, m in self.enemy_missiles.items():
@@ -274,7 +284,7 @@ class GameView:
                 # print("m_id = {}, now = {}, ttl = {}".format(m_id, str(now), str(m.ttl)))
                 if not m.isvisible() or now < m.ttl:
                     continue
-                print("hiding missile id=" + str(m_id))
+                # print("hiding missile id=" + str(m_id))
                 # move this thing out of the screen
                 m.setx(WINDOW_X)
                 m.sety(WINDOW_Y)

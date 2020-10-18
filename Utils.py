@@ -19,6 +19,8 @@ def rand_f(f1, f2):
 def to_int_degree(theta):
     return int(theta / math.pi * 180)
 
+def to_radian(theta):
+    return theta / 180 * math.pi
 
 def get_angle_for_vector(o, t):
     ox, oy = o
@@ -95,8 +97,12 @@ def get_dist_dot_to_line(dot, line_dot_1, line_dot_2, id, msg):
 
 
 def find_first_collision(moving_obj, potential_target_map, new_cors):
+    ignore_id_set = moving_obj.ignore_id_set if hasattr(moving_obj, "ignore_id_set") else set()
     target_min_heap = []
     for t_id, t in potential_target_map.items():
+        if t_id in ignore_id_set:
+            # print("missile {} ignores {}".format(str(moving_obj.id), str(t_id)))
+            continue
         dist = t.distance(moving_obj.xcor(), moving_obj.ycor())
         heapq.heappush(target_min_heap, (dist, t_id))
 
@@ -231,6 +237,51 @@ def fire_missile(attacker, target_cor, missile_list):
 
     return True
 
+
+def trigger_splash(battle_unit_attacker, battle_unit_hit, missile):
+    au, hu, m = battle_unit_attacker, battle_unit_hit, missile
+    if hasattr(m, "is_splash") and m.is_splash:
+        print("skip splashing on a splash missile")
+        return
+
+    skill_data = m.skill_data
+    if not isinstance(skill_data, SimpleRangedSkillWithSplash):
+        print("not a splash skill")
+        return
+    shard_count = skill_data.shard_count
+    center = (hu.xcor(), hu.ycor())
+
+    missile_shards = []
+    for i in range(shard_count):
+        splash_skill_data = deepcopy(skill_icy_blast_shard)
+        skill = splash_skill_data
+        radius = skill.attack_range
+        angle = to_radian(int(360 / shard_count * i))
+        dest_x = center[0] + math.cos(angle) * radius
+        dest_y = center[1] + math.sin(angle) * radius
+        dest = (dest_x, dest_y)
+
+        splash_missile = turtle.Turtle()
+        sm = splash_missile
+        sm.ignore_id_set = {hu.id}
+        sm.is_splash = True
+        sm.penup()
+        sm.shape(skill.shape)
+        sm.color(skill.color)
+        sm.goto(hu.xcor(), hu.ycor())
+        sm.orig_pos = center
+        sm.target_pos = dest
+        sm.shapesize(0.3)
+        sm.skill_data = skill
+        sm.owner = au
+
+        speed_per_sec = MISSILE_BASE_SPEED * FRAME * skill.flying_speed
+        max_flying_time = skill.attack_range / speed_per_sec
+        sm.ttl = time.time() + max_flying_time
+
+        missile_shards.append(sm)
+
+    return missile_shards
 
 def combine_map(m1, m2):
     m = dict()
