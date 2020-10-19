@@ -29,6 +29,10 @@ class GameView:
         if hasattr(win, "ttl"):
             delattr(win, "ttl")
 
+        # canvas setup
+        self.canvas = self.win.getcanvas()
+        self.scroll_ttl = 0
+
         # player setup
         self.player = turtle.Turtle()
         p = self.player
@@ -38,7 +42,7 @@ class GameView:
         p.shape("turtle")
         p.color(player.color)
         p.penup()
-        p.goto(player.start_pos[0], player.start_pos[1])
+        self.move_player(player.start_pos[0], player.start_pos[1])
         p.prev_pos = deepcopy(player.start_pos)
         p.target_pos = deepcopy(player.start_pos)
         p.orig_pos = deepcopy(player.start_pos)
@@ -145,6 +149,32 @@ class GameView:
     def enemy_attack(self, attacker, target_cor):
         return fire_missile(attacker, target_cor, self.enemy_missiles)
 
+    def move_player(self, x, y):
+        self.player.goto(x, y)
+
+        if not ENABLE_CANVAS_MOVING:
+            return
+
+        def get_fraction(v, total, window_size):
+            min_v, max_v = total / -2, total / 2
+            if v <= min_v + window_size / 2:
+                return 0
+            if v >= max_v - window_size / 2:
+                return 1
+            fraction = (v - (min_v + window_size / 2)) / total
+            return fraction
+
+        if time.time() - 0.05 < self.scroll_ttl:
+            return
+
+        scroll_fraction_x = get_fraction(x, WINDOW_X, self.win.window_width())
+        scroll_fraction_y = get_fraction(y, WINDOW_Y, self.win.window_height())
+        self.canvas.xview_moveto(scroll_fraction_x)
+        self.canvas.yview_moveto(1 - self.win.window_height() / WINDOW_Y - scroll_fraction_y)
+        self.scroll_ttl = time.time()
+        # print("x = {}, window_x = {}, window_width = {}, fraction_x = {}, canvas.xview() = {}".format(x, WINDOW_X, self.win.window_width(), scroll_fraction_x, self.canvas.xview()))
+        # print("y = {}, window_y = {}, window_height = {}, fraction_y = {}, canvas.yview() = {}".format(y, WINDOW_Y, self.win.window_height(), scroll_fraction_y, self.canvas.yview()))
+
     def tick(self):
         # move player
         p = self.player
@@ -153,7 +183,8 @@ class GameView:
         obj_hit = find_first_collision(p, self.walls, (x, y))
         if obj_hit is None:
             p.prev_pos = (p.xcor(), p.ycor())
-            p.goto(x, y)
+            if p.prev_pos != (x, y):
+                self.move_player(x, y)
             # print("[1] set p angle = " + str(moving_angle))
             if p.stop:
                 p.setheading(p.shooting_angle)
