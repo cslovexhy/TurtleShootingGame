@@ -154,6 +154,23 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
     return None
 
 
+def handle_health_regen(battle_unit):
+    bu = battle_unit
+    data = bu.battle_unit_data
+    if data.health_regen == 0 or data.max_health == data.health:
+        return
+    if not hasattr(bu, "last_health_regen"):
+        bu.last_health_regen = 0
+    now = time.time()
+    time_elapsed = min(1.0, now - bu.last_health_regen)
+    if time_elapsed >= 1.0:
+        print("health before = " + str(data.health))
+        data.health = min(data.max_health, data.health + data.health_regen)
+        print("health after = " + str(data.health))
+        bu.last_health_regen = now
+        bu.shapesize(data.get_shape_size())
+
+
 def handle_missile_damage(battle_unit, missile):
     bu, m = battle_unit, missile
     damage = max(0, m.owner.battle_unit_data.attack * m.skill_data.conversion - bu.battle_unit_data.defense)

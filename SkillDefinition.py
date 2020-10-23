@@ -67,6 +67,23 @@ class SimpleRangedSkillWithSplash(SimpleRangedSkill):
         self.shard_count = shard_count
 
 
+class SimpleRangedSkillWithHealthBurn(SimpleRangedSkill):
+    def __init__(self, name, key, attack_range, flying_speed, conversion, cool_down, shape, color, effects=None, spin=30, health_burn=999):
+        super().__init__(
+            name=name,
+            key=key,
+            attack_range=attack_range,
+            flying_speed=flying_speed,
+            conversion=conversion,
+            cool_down=cool_down,
+            shape=shape,
+            color=color,
+            effects=effects,
+            spin=spin
+        )
+        self.health_burn = health_burn
+
+
 def copy_effects_with_apply_time(effect):
     e = deepcopy(effect)
     e[EFFECT_KEY_APPLY_TIME] = time.time()
@@ -136,4 +153,16 @@ skill_icy_blast_shard = SimpleRangedSkill(
     effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5}},
     color=BLUE,
     spin=30
+)
+
+skill_suicide_attack = SimpleRangedSkillWithHealthBurn(
+    name="Suicide Attack",
+    key='3',
+    attack_range=10,
+    flying_speed=5,
+    conversion=1,
+    cool_down=999,
+    shape="triangle",
+    color=WHITE,
+    health_burn=999
 )

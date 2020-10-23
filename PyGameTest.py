@@ -21,14 +21,13 @@ class GameView:
         self.win = turtle.Screen()
         win = self.win
         win.title("Small game, level {}".format(str(level)))
-        win.bgcolor(BLACK)
         # learned from here: https://stackoverflow.com/questions/34687998/turtle-screen-fullscreen-on-program-startup
         win.screensize(dim[0], dim[1])
         win.setup(width=1.0, height=1.0, startx=None, starty=None)
+        win.bgcolor(GRAY)
         win.tracer(0)
         if hasattr(win, "ttl"):
             delattr(win, "ttl")
-
         # canvas setup
         self.canvas = self.win.getcanvas()
         self.scroll_ttl = 0
@@ -289,6 +288,10 @@ class GameView:
                     if dead:
                         self.player.alive = False
                         print("Player down.")
+                    if hasattr(skill, "health_burn"):
+                        dead = handle_missile_damage(m.owner, m)
+                        if dead:
+                            del self.enemies[m.owner.id]
                 elif "wall_" in obj_hit.id:
                     print("hit wall")
                     wall_hit = obj_hit
@@ -323,6 +326,12 @@ class GameView:
 
         handle_missile_visibility(self.missiles)
         handle_missile_visibility(self.enemy_missiles)
+
+        # handle health regen
+        if self.player.alive:
+            handle_health_regen(self.player)
+        for e_id, e in self.enemies.items():
+            handle_health_regen(e)
 
 
 class CasualGame:

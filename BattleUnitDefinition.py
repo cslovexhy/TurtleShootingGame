@@ -3,9 +3,40 @@ from AIDefinition import *
 from SkillDefinition import *
 from ColorDefinition import *
 
+# --- SPEED RELATED ---
+SPEED_PLAYER = 2.0
+SPEED_ENEMY_NORMAL = 1.0
+SPEED_ENEMY_FAST = 1.2
+SPEED_ENEMY_VERY_FAST = 1.5
+SPEED_ENEMY_ULTRA_FAST = 2.5
+
+# --- ATTACK/DEFENSE/HEALTH RELATED ---
+HEALTH_PLAYER = 100
+ATTACK_PLAYER = 10
+DEFENSE_PLAYER = 0
+# enemy attack has to be higher than player base defense
+HEALTH_ENEMY_VERY_WEAK, ATTACK_ENEMY_VERY_WEAK, DEFENSE_ENEMY_VERY_WEAK = 5, 2, 0
+HEALTH_ENEMY_WEAK, ATTACK_ENEMY_WEAK, DEFENSE_ENEMY_WEAK = 20, 5, 1
+HEALTH_ENEMY_NORMAL, ATTACK_ENEMY_NORMAL, DEFENSE_ENEMY_NORMAL = 40, 7, 2
+HEALTH_ENEMY_STRONG, ATTACK_ENEMY_STRONG, DEFENSE_ENEMY_STRONG = 60, 10, 3
+HEALTH_ENEMY_VERY_STRONG, ATTACK_ENEMY_VERY_STRONG, DEFENSE_ENEMY_VERY_STRONG = 100, 15, 5
+HEALTH_ENEMY_SUPER_STRONG, ATTACK_ENEMY_SUPER_STRONG, DEFENSE_ENEMY_SUPER_STRONG = 200, 30, 10
+
+HEALTH_REGEN_PLAYER = 2.0
+HEALTH_REGEN_ENEMY_NORMAL = 0.0
+HEALTH_REGEN_BOSS = 0.5
+
+# --- AGGRO RELATED ---
+# if player stays too close, will gain enemy's aggro
+AGGRO_RANGE_FOR_ENEMY_NORMAL = 150
+AGGRO_RANGE_FOR_ENEMY_SCOUT = 200
+AGGRO_RANGE_FOR_ENEMY_TOWER = 250
+# rally radius around the enemy being hit.
+AGGRO_RANGE_FOR_HIT = 150
+
 
 class BattleUnit:
-    def __init__(self, health, attack, defense, speed=1.0, color=GREEN, skills=None):
+    def __init__(self, health, attack, defense, speed=SPEED_ENEMY_NORMAL, color=GREEN, skills=None, health_regen=HEALTH_REGEN_ENEMY_NORMAL):
         if skills is None:
             skills = list()
         self.start_pos = None
@@ -15,6 +46,7 @@ class BattleUnit:
         self.defense = defense
         self.speed = speed
         self.skills = {skill.key: skill for skill in skills}
+        self.health_regen = health_regen
         self.color = color
         self.effects = dict()
 
@@ -30,7 +62,6 @@ class BattleUnit:
         max_possible = MIN_SHAPE_PCT + (self.max_health / (STANDARD_HEALTH * MAX_SHAPE_PCT))
         pct = MIN_SHAPE_PCT + (max_possible - MIN_SHAPE_PCT) * (self.health / self.max_health)
         return pct
-
 
     def add_effects(self, effects):
         for effect_type, effect in effects.items():
@@ -54,7 +85,7 @@ class BattleUnit:
 
 
 class PlayerUnit(BattleUnit):
-    def __init__(self, health=STANDARD_HEALTH, attack=20, defense=3, speed=2.0, color=ORANGE, skills=None):
+    def __init__(self, health=STANDARD_HEALTH, attack=20, defense=3, speed=SPEED_PLAYER, color=ORANGE, skills=None, health_regen=HEALTH_REGEN_PLAYER):
         if skills is None:
             skills = [
                 deepcopy(skill_icy_blast),
@@ -70,7 +101,8 @@ class PlayerUnit(BattleUnit):
             defense=defense,
             speed=speed,
             color=color,
-            skills=skills
+            skills=skills,
+            health_regen=health_regen
         )
         self.left_click_skill_key = skills[0].key
         if len(skills) == 1:
@@ -80,7 +112,7 @@ class PlayerUnit(BattleUnit):
 
 
 class EnemyUnit(BattleUnit):
-    def __init__(self, health, attack, defense, ai_mode=ENFORCER, speed=1.0, color=GREEN, skills=None, aggro_range=AGGRO_RANGE_FOR_PULLING):
+    def __init__(self, health, attack, defense, ai_mode=ENFORCER, speed=SPEED_ENEMY_NORMAL, color=GREEN, skills=None, aggro_range=AGGRO_RANGE_FOR_ENEMY_NORMAL, health_regen=0.0):
         if skills is None:
             skills = get_skill_list_by_mode(ai_mode)
         assert len(skills) >= 1
@@ -91,6 +123,7 @@ class EnemyUnit(BattleUnit):
             speed=speed,
             color=color,
             skills=skills,
+            health_regen=health_regen
         )
         self.aggro_range = aggro_range
         self.left_click_skill_key = skills[0].key
@@ -101,8 +134,55 @@ class EnemyUnit(BattleUnit):
 
 
 player_sample = PlayerUnit()
-enemy_biker_sample = EnemyUnit(health=20, attack=5, defense=2, speed=1.5, color=GREEN)
-enemy_enforcer_sample = EnemyUnit(health=40, attack=10, defense=3, color=DARK_GREEN)
-enemy_freezer_sample = EnemyUnit(health=40, attack=10, defense=2, color=BLUE, skills=deepcopy([skill_ice_ball]))
-enemy_flamethrower_sample = EnemyUnit(health=60, attack=10, defense=4, color=RED, skills=deepcopy([skill_fire_ball]))
-enemy_underboss_sample = EnemyUnit(health=150, attack=20, defense=10, color=PURPLE, speed=1.3, skills=deepcopy([skill_fire_ball, skill_ice_ball]))
+
+enemy_biker_sample = EnemyUnit(
+    health=HEALTH_ENEMY_WEAK,
+    attack=ATTACK_ENEMY_WEAK,
+    defense=DEFENSE_ENEMY_WEAK,
+    speed=SPEED_ENEMY_VERY_FAST,
+    color=GREEN
+)
+
+enemy_enforcer_sample = EnemyUnit(
+    health=HEALTH_ENEMY_NORMAL,
+    attack=ATTACK_ENEMY_NORMAL,
+    defense=DEFENSE_ENEMY_STRONG,
+    speed=SPEED_ENEMY_FAST,
+    color=DARK_GREEN
+)
+
+enemy_freezer_sample = EnemyUnit(
+    health=HEALTH_ENEMY_NORMAL,
+    attack=ATTACK_ENEMY_STRONG,
+    defense=DEFENSE_ENEMY_WEAK,
+    color=BLUE,
+    skills=deepcopy([skill_ice_ball])
+)
+
+enemy_flamethrower_sample = EnemyUnit(
+    health=HEALTH_ENEMY_STRONG,
+    attack=ATTACK_ENEMY_STRONG,
+    defense=DEFENSE_ENEMY_STRONG,
+    color=RED,
+    skills=deepcopy([skill_fire_ball])
+)
+
+enemy_suicide_drone_sample = EnemyUnit(
+    health=HEALTH_ENEMY_VERY_WEAK,
+    attack=ATTACK_ENEMY_SUPER_STRONG,
+    defense=0,
+    speed=SPEED_ENEMY_ULTRA_FAST,
+    color=BLACK,
+    aggro_range=AGGRO_RANGE_FOR_ENEMY_SCOUT,
+    skills=deepcopy([skill_suicide_attack])
+)
+
+enemy_underboss_sample = EnemyUnit(
+    health=HEALTH_ENEMY_SUPER_STRONG,
+    attack=ATTACK_ENEMY_VERY_STRONG,
+    defense=DEFENSE_ENEMY_VERY_STRONG,
+    color=PURPLE,
+    speed=SPEED_ENEMY_VERY_FAST,
+    skills=deepcopy([skill_fire_ball, skill_ice_ball]),
+    health_regen=HEALTH_REGEN_BOSS
+)
