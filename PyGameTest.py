@@ -12,7 +12,7 @@ from Constants import *
 
 class GameView:
 
-    def __init__(self, dim, level, player, enemies, walls):
+    def __init__(self, dim, level, player, enemies, walls, items):
 
         self.level_complete = False
 
@@ -90,13 +90,25 @@ class GameView:
             self.walls[w.id] = w
             self.walls_cor_set.add(wall.pos)
 
+        # item setup
+        self.items = dict()
+        for item_id, item in enumerate(items):
+            i = turtle.Turtle()
+            i.id = "item_" + str(item_id)
+            i.shape(item.shape)
+            i.color(item.color)
+            i.penup()
+            i.goto(item.pos[0], item.pos[1])
+            i.direction = STOP
+            i.item_unit_data = item
+            self.items[i.id] = i
+
         # event listener setup
         win.listen()
         win.onkey(partial(stop_moving, p), 's')
-        win.onclick(self.move_with_left_click)
+        win.onclick(self.left_click_callback)
         win.onclick(self.attack_with_right_click, 2)
-        for key in p.battle_unit_data.skills:
-            win.onkey(partial(self.select_skill, key), key)
+        self.bind_skills()
 
         # main loop
         iter_count = 0
@@ -124,8 +136,30 @@ class GameView:
             # p.direction = STOP
             iter_count += 1
 
+    def bind_skills(self):
+        for key in self.player.battle_unit_data.skills:
+            self.win.onkey(partial(self.select_skill, key), key)
+
     def select_skill(self, skill_key):
         self.player.battle_unit_data.left_click_skill_key = skill_key
+
+    def left_click_callback(self, target_x, target_y):
+        for item_id, item in self.items.items():
+            cor = (item.xcor(), item.ycor())
+            is_player_nearby = get_dist((self.player.xcor(), self.player.ycor()), cor) < 30
+            is_click_on_item = get_dist((target_x, target_y), cor) < 30
+            if is_player_nearby and is_click_on_item:
+                self.pick_up_item(item_id)
+                return
+        # if not item pickup, left click just mean moving.
+        self.move_with_left_click(target_x, target_y)
+
+    def pick_up_item(self, item_id):
+        player_data = self.player.battle_unit_data
+        handle_item_pick_up(player_data, self.items[item_id].item_unit_data, self.bind_skills)
+        item = self.items[item_id]
+        item.hideturtle()
+        del self.items[item_id]
 
     def move_with_left_click(self, target_x, target_y):
         p = self.player
@@ -340,9 +374,9 @@ class CasualGame:
         self.dim = (WINDOW_X, WINDOW_Y)
 
         for level in range(START_LEVEL, MAX_LEVEL+1):
-            self.player, self.enemies, self.walls = get_units_by_level(level)
+            self.player, self.enemies, self.walls, self.items = get_units_by_level(level)
             print("Initiating level {}".format(str(level)))
-            self.view = GameView(self.dim, level, self.player, self.enemies, self.walls)
+            self.view = GameView(self.dim, level, self.player, self.enemies, self.walls, self.items)
             if not self.view.level_complete:
                 print("level {} failed, game over.".format(str(level)))
                 break

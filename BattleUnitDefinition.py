@@ -89,9 +89,9 @@ class PlayerUnit(BattleUnit):
         if skills is None:
             skills = [
                 deepcopy(skill_punch),
-                deepcopy(skill_fire_ball),
-                deepcopy(skill_ice_ball),
-                deepcopy(skill_icy_blast),
+                # deepcopy(skill_fire_ball),
+                # deepcopy(skill_ice_ball),
+                # deepcopy(skill_icy_blast),
             ]
         reassign_skill_keys(skills)
         assert len(skills) >= 1
