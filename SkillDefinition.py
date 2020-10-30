@@ -51,7 +51,7 @@ class SimpleRangedSkill(Skill):
 
 
 class SimpleRangedSkillWithSplash(SimpleRangedSkill):
-    def __init__(self, name, key, attack_range, flying_speed, conversion, cool_down, shape, color, effects=None, spin=30, shard_count=3):
+    def __init__(self, name, key, attack_range, flying_speed, conversion, cool_down, shape, color, effects=None, spin=30, shard_count=3, shard_data=None):
         super().__init__(
             name=name,
             key=key,
@@ -65,6 +65,7 @@ class SimpleRangedSkillWithSplash(SimpleRangedSkill):
             spin=spin
         )
         self.shard_count = shard_count
+        self.shard_data = shard_data
 
 
 class SimpleRangedSkillWithHealthBurn(SimpleRangedSkill):
@@ -82,6 +83,23 @@ class SimpleRangedSkillWithHealthBurn(SimpleRangedSkill):
             spin=spin
         )
         self.health_burn = health_burn
+
+
+class SimpleNovaSkill(SimpleRangedSkill):
+    def __init__(self, name, key, attack_range, flying_speed, conversion, cool_down, shape, color, effects=None, spin=30, shard_count=16):
+        super().__init__(
+            name=name,
+            key=key,
+            attack_range=attack_range,
+            flying_speed=flying_speed,
+            conversion=conversion,
+            cool_down=cool_down,
+            shape=shape,
+            color=color,
+            effects=effects,
+            spin=spin,
+        )
+        self.shard_count = shard_count
 
 
 def copy_effects_with_apply_time(effect):
@@ -129,19 +147,6 @@ skill_punch = SimpleRangedSkill(
     color=PURPLE
 )
 
-skill_icy_blast = SimpleRangedSkillWithSplash(
-    name="Icy Blast",
-    key='4',
-    attack_range=300,
-    flying_speed=1.5,
-    conversion=0.8,
-    cool_down=.5,
-    shape='triangle',
-    color=BLUE,
-    effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5}},
-    spin=30
-)
-
 skill_icy_blast_shard = SimpleRangedSkill(
     name="Icy Blast Shard",
     key=None,
@@ -155,6 +160,20 @@ skill_icy_blast_shard = SimpleRangedSkill(
     spin=30
 )
 
+skill_icy_blast = SimpleRangedSkillWithSplash(
+    name="Icy Blast",
+    key='4',
+    attack_range=300,
+    flying_speed=1.5,
+    conversion=0.8,
+    cool_down=.5,
+    shape='triangle',
+    color=BLUE,
+    effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5}},
+    spin=30,
+    shard_data=deepcopy(skill_icy_blast_shard)
+)
+
 skill_suicide_attack = SimpleRangedSkillWithHealthBurn(
     name="Suicide Attack",
     key='3',
@@ -165,4 +184,16 @@ skill_suicide_attack = SimpleRangedSkillWithHealthBurn(
     shape="triangle",
     color=WHITE,
     health_burn=999
+)
+
+skill_nova = SimpleNovaSkill(
+    name="Nova",
+    key='4',
+    attack_range=200,
+    flying_speed=2.0,
+    conversion=0.6,
+    cool_down=1,
+    shape='arrow',
+    color=WHITE,
+    spin=45
 )

@@ -178,7 +178,11 @@ class GameView:
 
     def attack_with_right_click(self, target_x, target_y):
         p = self.player
-        fire_missile(p, (target_x, target_y), self.missiles)
+        skill = p.battle_unit_data.skills[p.battle_unit_data.left_click_skill_key]
+        if isinstance(skill, SimpleNovaSkill):
+            fire_nova(p, self.missiles)
+        else:
+            fire_missile(p, (target_x, target_y), self.missiles)
 
     def enemy_attack(self, attacker, target_cor):
         return fire_missile(attacker, target_cor, self.enemy_missiles)
@@ -383,7 +387,7 @@ class GameView:
 
         centers = [(self.player.xcor(), self.player.ycor())]
         p_radius = self.player.battle_unit_data.visual_range
-        # TODO: have differernt visual range for player's missiles
+        # TODO: have different visual range for player's missiles
         # for _, m in self.missiles.items():
         #     centers.append((m.xcor(), m.ycor()))
 

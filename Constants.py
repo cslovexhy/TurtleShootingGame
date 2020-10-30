@@ -1,4 +1,6 @@
-WINDOW_X, WINDOW_Y = 1400, 740
+# numbers here needs to be 40*N, otherwise path-finding algorithm will not work
+WINDOW_X, WINDOW_Y = 1400, 760
+
 FRAME = 24
 MAX_SHAPE_PCT = 2.0
 MIN_SHAPE_PCT = .4

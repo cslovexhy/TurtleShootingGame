@@ -205,8 +205,9 @@ def handle_missile_damage_on_wall(wall_unit, missile):
         return False
 
 
-def fire_missile(attacker, target_cor, missile_list):
+def fire_missile(attacker, target_cor, missile_list, ignore_cool_down=False):
     p = attacker
+    skill = p.battle_unit_data.skills[p.battle_unit_data.left_click_skill_key]
     target_x, target_y = target_cor
     x, y = p.xcor(), p.ycor()
     if target_x == x and target_y == y:
@@ -216,21 +217,21 @@ def fire_missile(attacker, target_cor, missile_list):
     p.target_pos = (x, y)
     p.stop = True
     p.shooting_angle = angle
-    # print("[2] set p angle = " + str(angle))
-    skill = p.battle_unit_data.skills[p.battle_unit_data.left_click_skill_key]
+
     now = time.time()
-    if not skill.last_used:
-        skill.last_used = now
-    else:
-        time_since_last_use = now - skill.last_used
-        if time_since_last_use > skill.cool_down:
+    if not ignore_cool_down:
+        if not skill.last_used:
             skill.last_used = now
         else:
-            print("{} in cool down, wait for {} seconds".format(
-                skill.name,
-                str(skill.cool_down - time_since_last_use)
-            ))
-            return False
+            time_since_last_use = now - skill.last_used
+            if time_since_last_use > skill.cool_down:
+                skill.last_used = now
+            else:
+                print("{} in cool down, wait for {} seconds".format(
+                    skill.name,
+                    str(skill.cool_down - time_since_last_use)
+                ))
+                return False
 
     missile = turtle.Turtle()
     m = missile
@@ -255,6 +256,23 @@ def fire_missile(attacker, target_cor, missile_list):
     return True
 
 
+def fire_nova(attacker, missile_list):
+    # here i'm only copying 1 skill for all missiles, hope nothing bad happens.
+    skill = deepcopy(attacker.battle_unit_data.skills[attacker.battle_unit_data.left_click_skill_key])
+    shard_count = skill.shard_count
+    print("shard_count = " + str(shard_count))
+    center = (attacker.xcor(), attacker.ycor())
+    for i in range(shard_count):
+        radius = skill.attack_range
+        angle = to_radian(int(360 / shard_count * i))
+        dest_x = center[0] + math.cos(angle) * radius
+        dest_y = center[1] + math.sin(angle) * radius
+        dest = (dest_x, dest_y)
+        print("dest = " + str(dest))
+        ignore_cool_down = i != 0
+        fire_missile(attacker, dest, missile_list, ignore_cool_down)
+
+
 def trigger_splash(battle_unit_attacker, battle_unit_hit, missile):
     au, hu, m = battle_unit_attacker, battle_unit_hit, missile
     if hasattr(m, "is_splash") and m.is_splash:
@@ -270,7 +288,7 @@ def trigger_splash(battle_unit_attacker, battle_unit_hit, missile):
 
     missile_shards = []
     for i in range(shard_count):
-        splash_skill_data = deepcopy(skill_icy_blast_shard)
+        splash_skill_data = deepcopy(skill_data.shard_data)
         skill = splash_skill_data
         radius = skill.attack_range
         angle = to_radian(int(360 / shard_count * i))
@@ -299,6 +317,7 @@ def trigger_splash(battle_unit_attacker, battle_unit_hit, missile):
         missile_shards.append(sm)
 
     return missile_shards
+
 
 def combine_map(m1, m2):
     m = dict()
@@ -368,7 +387,7 @@ def get_way_points(a, b, walls_cor_set):
     new_b = to_way_point(b)
 
     # print("a = {}, new_a = {}, b = {}, new_b = {}".format(str(a), str(new_a), str(b), str(new_b)))
-    # print("walls = {}".format(str(walls_cor_set)))
+    print("walls = {}".format(str(walls_cor_set)))
 
     # a and b maybe double added, but should be ok.
     valid, path = find_path(new_a, new_b, walls_cor_set)
