@@ -1,5 +1,6 @@
 from Constants import *
 from ColorDefinition import *
+from copy import deepcopy
 
 
 class WallUnit:
@@ -8,6 +9,7 @@ class WallUnit:
         self.health = health
         self.defense = defense
         self.color = color
+        self.color_dim = to_dim_color(color)
         self.shape = "square"
 
 

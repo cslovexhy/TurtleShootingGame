@@ -3,6 +3,8 @@ from AIDefinition import *
 from SkillDefinition import *
 from ColorDefinition import *
 
+PLAYER_BASE_VISUAL_RANGE = 250
+
 # --- SPEED RELATED ---
 SPEED_PLAYER = 2.0
 SPEED_ENEMY_NORMAL = 1.0
@@ -104,6 +106,7 @@ class PlayerUnit(BattleUnit):
             skills=skills,
             health_regen=health_regen
         )
+        self.visual_range = PLAYER_BASE_VISUAL_RANGE
         self.left_click_skill_key = skills[0].key
         if len(skills) == 1:
             self.right_click_skill_key = skills[0].key

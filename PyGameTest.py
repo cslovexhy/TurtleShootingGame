@@ -78,6 +78,7 @@ class GameView:
         # wall setup
         self.walls = dict()
         self.walls_cor_set = set()
+        self.walls_visited = set()
         for wall_id, wall in enumerate(walls):
             w = turtle.Turtle()
             w.id = "wall_" + str(wall_id)
@@ -361,11 +362,48 @@ class GameView:
         handle_missile_visibility(self.missiles)
         handle_missile_visibility(self.enemy_missiles)
 
+        # handle player visibility
+        self.update_visibility()
+
         # handle health regen
         if self.player.alive:
             handle_health_regen(self.player)
         for e_id, e in self.enemies.items():
             handle_health_regen(e)
+
+    def update_visibility(self):
+        if not ENABLE_WAR_MIST:
+            return
+
+        def too_close(cor, radius):
+            for c in centers:
+                if get_dist(cor, c) <= radius:
+                    return True
+            return False
+
+        centers = [(self.player.xcor(), self.player.ycor())]
+        p_radius = self.player.battle_unit_data.visual_range
+        # TODO: have differernt visual range for player's missiles
+        # for _, m in self.missiles.items():
+        #     centers.append((m.xcor(), m.ycor()))
+
+        for _, e in self.enemies.items():
+            if too_close((e.xcor(), e.ycor()), p_radius):
+                e.showturtle()
+            else:
+                e.hideturtle()
+
+        for _, w in self.walls.items():
+            cor = (w.xcor(), w.ycor())
+            if too_close(cor, p_radius):
+                w.color(w.wall_unit_data.color)
+                w.showturtle()
+                self.walls_visited.add(cor)
+            else:
+                if cor in self.walls_visited:
+                    w.color(w.wall_unit_data.color_dim)
+                else:
+                    w.hideturtle()
 
 
 class CasualGame:

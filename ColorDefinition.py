@@ -6,6 +6,12 @@ def normalize(r, g, b):
     return inv(r), inv(g), inv(b)
 
 
+def to_dim_color(color):
+    r, g, b = color
+    x = .8
+    return x * r, x * g, x * b
+
+
 ORANGE = normalize(255, 69, 0)
 
 RED = normalize(255, 0, 0)
