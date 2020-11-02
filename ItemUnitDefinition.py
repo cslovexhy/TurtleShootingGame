@@ -25,6 +25,8 @@ skill_ice_ball_item_sample = SkillItemUnit(skill_ice_ball)
 
 skill_icy_blast_item_sample = SkillItemUnit(skill_icy_blast)
 
+skill_nova_item_sample = SkillItemUnit(skill_nova)
+
 
 def handle_item_pick_up(player_data, item_data, bind_skill_callback):
     if isinstance(item_data, SkillItemUnit):

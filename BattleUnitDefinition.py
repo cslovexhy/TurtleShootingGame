@@ -90,8 +90,8 @@ class PlayerUnit(BattleUnit):
     def __init__(self, health=STANDARD_HEALTH, attack=20, defense=3, speed=SPEED_PLAYER, color=ORANGE, skills=None, health_regen=HEALTH_REGEN_PLAYER):
         if skills is None:
             skills = [
-                deepcopy(skill_nova),
-                # deepcopy(skill_punch),
+                deepcopy(skill_punch),
+                # deepcopy(skill_nova),
                 # deepcopy(skill_fire_ball),
                 # deepcopy(skill_ice_ball),
                 # deepcopy(skill_icy_blast),

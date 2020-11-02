@@ -20,12 +20,8 @@ class AI:
             b = self.battle_unit.ui
             bx, by = b.xcor(), b.ycor()
             skill = next(iter(self.battle_unit.skills.values()))
-            # this is not-so-hardcore version...
-            if get_dist((bx, by), (tx, ty)) < skill.attack_range and skill.is_ready():
-            # enabling this, enemy will take down brick walls
-            # if skill.is_ready():
-                return {"decision": AI_DECISION_ATTACK, "skill": skill, "target_cor": (tx, ty)}
-            else:
+
+            def move_to_dest(dest_pos):
                 if hasattr(b, "way_point_ttl") and time.time() < b.way_point_ttl:
                     if b.way_points and (bx, by) == b.way_points[-1]:
                         # print("way point popped up")
@@ -35,7 +31,7 @@ class AI:
                             b.way_point_ttl = 0
                 else:
                     # print("trying to get way point")
-                    b.way_points = get_way_points((bx, by), (tx, ty), walls_cor_set)
+                    b.way_points = get_way_points((bx, by), dest_pos, walls_cor_set)
                     # print("way point got: {}".format(str(b.way_points)))
                     if b.way_points:
                         # space out the path finding here for enemies
@@ -55,6 +51,20 @@ class AI:
                 # print("next stop = {}".format(str(next_stop)))
 
                 return {"decision": AI_DECISION_MOVE, "next_stop": next_stop}
+
+            if b.last_aggro == 0:
+                x, y = b.battle_unit_data.start_pos
+                angle = 90
+                return {"decision": AI_DECISION_MOVE, "next_stop": (x, y, angle)}
+            elif time.time() - b.last_aggro > 5:
+                dest_pos = b.battle_unit_data.start_pos
+                print("move back to start pos")
+                return move_to_dest(dest_pos)
+            elif get_dist((bx, by), (tx, ty)) < skill.attack_range and skill.is_ready():
+                return {"decision": AI_DECISION_ATTACK, "skill": skill, "target_cor": (tx, ty)}
+            else:
+                dest_pos = (tx, ty)
+                return move_to_dest(dest_pos)
         else:
             raise Exception("ai_mode {} is not supported yet".format(self.ai_mode))
 

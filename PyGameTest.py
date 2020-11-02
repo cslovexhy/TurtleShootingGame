@@ -57,7 +57,7 @@ class GameView:
         for enemy_id, enemy in enumerate(enemies):
             e = turtle.Turtle()
             e.id = "enemy_" + str(enemy_id)
-            e.aggro = False
+            e.last_aggro = 0
             e.shape("turtle")
             e.color(enemy.color)
             e.penup()
@@ -245,9 +245,9 @@ class GameView:
 
         # enemy ai actions
         for e_id, e in self.enemies.items():
-            if not e.aggro:
-                e.aggro = e.distance(p.xcor(), p.ycor()) <= e.battle_unit_data.aggro_range
-                continue
+            if e.distance(p.xcor(), p.ycor()) <= e.battle_unit_data.aggro_range:
+                print("refreshing aggro")
+                e.last_aggro = time.time()
             decision = e.battle_unit_data.ai.decide(self.walls_cor_set)
             # print("decision for enemy {} is: {}".format(str(e_id), str(decision)))
             if decision['decision'] == AI_DECISION_ATTACK:
@@ -283,7 +283,8 @@ class GameView:
                         added_missile_shards.extend(missile_shards)
                     aggro_list = get_units_within_range(self.enemies, (enemy_hit.xcor(), enemy_hit.ycor()), AGGRO_RANGE_FOR_HIT)
                     for unit in aggro_list:
-                        unit.aggro = True
+                        print("refreshing aggro by hit")
+                        unit.last_aggro = time.time()
                     if dead:
                         del self.enemies[enemy_hit.id]
                         print("{} is down, {} left.".format(enemy_hit.id, str(len(self.enemies))))

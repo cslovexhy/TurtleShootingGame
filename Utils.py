@@ -376,6 +376,7 @@ def find_path(a, b, blocks):
 
 # from a to b, considering walls cannot be passed
 def get_way_points(a, b, walls_cor_set):
+    print("try finding path...")
     result = []
 
     def to_way_point(cor):
@@ -387,7 +388,7 @@ def get_way_points(a, b, walls_cor_set):
     new_b = to_way_point(b)
 
     # print("a = {}, new_a = {}, b = {}, new_b = {}".format(str(a), str(new_a), str(b), str(new_b)))
-    print("walls = {}".format(str(walls_cor_set)))
+    # print("walls = {}".format(str(walls_cor_set)))
 
     # a and b maybe double added, but should be ok.
     valid, path = find_path(new_a, new_b, walls_cor_set)
