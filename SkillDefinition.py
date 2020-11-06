@@ -131,7 +131,7 @@ skill_ice_ball = SimpleRangedSkill(
     attack_range=350,
     flying_speed=1.2,
     conversion=0.5,
-    cool_down=2,
+    cool_down=1,
     shape=SHAPE_CIRCLE,
     effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5}},
     color=BLUE,
@@ -140,7 +140,7 @@ skill_ice_ball = SimpleRangedSkill(
 skill_punch = SimpleRangedSkill(
     name="Punch",
     key='3',
-    attack_range=70,
+    attack_range=150,
     flying_speed=1,
     conversion=1,
     cool_down=0.5,
@@ -197,4 +197,28 @@ skill_nova = SimpleNovaSkill(
     shape=SHAPE_ARROW,
     color=WHITE,
     spin=45
+)
+
+skill_poison_dart = SimpleRangedSkill(
+    name="Poison Dart",
+    key='3',
+    attack_range=300,
+    flying_speed=1,
+    conversion=1,
+    cool_down=1.5,
+    shape=SHAPE_TRIANGLE,
+    color=DARK_GREEN,
+    spin=25
+)
+
+skill_fire_dart = SimpleRangedSkill(
+    name="Fire Dart",
+    key='3',
+    attack_range=300,
+    flying_speed=1,
+    conversion=1,
+    cool_down=1.5,
+    shape=SHAPE_TRIANGLE,
+    color=RED,
+    spin=25
 )

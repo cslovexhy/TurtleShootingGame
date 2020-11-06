@@ -270,7 +270,10 @@ def fire_nova(attacker, missile_list):
         dest = (dest_x, dest_y)
         print("dest = " + str(dest))
         ignore_cool_down = i != 0
-        fire_missile(attacker, dest, missile_list, ignore_cool_down)
+        can_fire = fire_missile(attacker, dest, missile_list, ignore_cool_down)
+        if not can_fire:
+            print("nova in cool down")
+            return
 
 
 def trigger_splash(battle_unit_attacker, battle_unit_hit, missile):

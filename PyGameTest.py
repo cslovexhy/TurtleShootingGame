@@ -38,7 +38,7 @@ class GameView:
         register_all_shapes(win)
 
         # player setup
-        self.player = turtle.Turtle(SHAPE_TURTLE)
+        self.player = turtle.Turtle(SHAPE_SHARK)
         p = self.player
         p.id = "player_0"
         p.alive = True
@@ -146,11 +146,12 @@ class GameView:
 
     def select_skill(self, skill_key):
         self.player.battle_unit_data.left_click_skill_key = skill_key
+        print("player selected skill {}".format(self.player.battle_unit_data.skills[skill_key].name))
 
     def left_click_callback(self, target_x, target_y):
         for item_id, item in self.items.items():
             cor = (item.xcor(), item.ycor())
-            is_player_nearby = get_dist((self.player.xcor(), self.player.ycor()), cor) < 30
+            is_player_nearby = get_dist((self.player.xcor(), self.player.ycor()), cor) < 50
             is_click_on_item = get_dist((target_x, target_y), cor) < 30
             if is_player_nearby and is_click_on_item:
                 self.pick_up_item(item_id)

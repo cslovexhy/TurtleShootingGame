@@ -20,7 +20,14 @@ class AI:
             tx, ty = t.xcor(), t.ycor()
             b = self.battle_unit.ui
             bx, by = b.xcor(), b.ycor()
-            skill = next(iter(self.battle_unit.skills.values()))
+
+            # set a random skill for enemy
+            skill_items = [(key, skill) for key, skill in self.battle_unit.skills.items()]
+            skill_count = len(skill_items)
+            skill_idx = random.randint(0, skill_count-1)
+            key, skill = skill_items[skill_idx]
+            b.battle_unit_data.left_click_skill_key = key
+            # print("skill key {} selected".format(key))
 
             def move_to_dest(dest_pos):
                 if hasattr(b, "way_point_ttl") and time.time() < b.way_point_ttl:

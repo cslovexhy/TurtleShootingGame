@@ -23,8 +23,8 @@ SPEED_ENEMY_ULTRA_FAST = 2.5 * SPEED_FACTOR
 
 # --- ATTACK/DEFENSE/HEALTH RELATED ---
 HEALTH_PLAYER = 100
-ATTACK_PLAYER = 100
-DEFENSE_PLAYER = 0
+ATTACK_PLAYER = 30
+DEFENSE_PLAYER = 10
 # enemy attack has to be higher than player base defense
 HEALTH_ENEMY_VERY_WEAK, ATTACK_ENEMY_VERY_WEAK, DEFENSE_ENEMY_VERY_WEAK = 5, 2, 0
 HEALTH_ENEMY_WEAK, ATTACK_ENEMY_WEAK, DEFENSE_ENEMY_WEAK = 20, 5, 1
@@ -56,7 +56,8 @@ class BattleUnit:
         self.attack = attack
         self.defense = defense
         self.speed = speed
-        self.skills = {skill.key: skill for skill in skills}
+        # skill key start from 1 and keep adding. assuming player never loses any skill
+        self.skills = {str(i+1): skill for i, skill in enumerate(skills)}
         self.health_regen = health_regen
         self.color = color
         self.effects = dict()
@@ -117,11 +118,7 @@ class PlayerUnit(BattleUnit):
             health_regen=health_regen
         )
         self.visual_range = PLAYER_BASE_VISUAL_RANGE
-        self.left_click_skill_key = skills[0].key
-        if len(skills) == 1:
-            self.right_click_skill_key = skills[0].key
-        else:
-            self.right_click_skill_key = skills[1].key
+        self.left_click_skill_key = '1' # first skill is '1', corresponding to keyboard
 
 
 class EnemyUnit(BattleUnit):
@@ -204,5 +201,16 @@ enemy_underboss_sample = EnemyUnit(
     color=PURPLE,
     speed=SPEED_ENEMY_VERY_FAST,
     skills=deepcopy([skill_fire_ball, skill_ice_ball]),
+    health_regen=HEALTH_REGEN_BOSS
+)
+
+enemy_boss_sample = EnemyUnit(
+    type=ENEMY_TYPE_UNDERBOSS,
+    health=HEALTH_ENEMY_SUPER_STRONG * 2,
+    attack=ATTACK_ENEMY_VERY_STRONG,
+    defense=DEFENSE_ENEMY_VERY_STRONG,
+    color=BLACK,
+    speed=SPEED_ENEMY_VERY_FAST,
+    skills=deepcopy([skill_poison_dart, skill_fire_dart, skill_icy_blast]),
     health_regen=HEALTH_REGEN_BOSS
 )

@@ -4,9 +4,11 @@ SHAPE_CIRCLE = "circle"
 SHAPE_SQUARE = "square"
 SHAPE_ARROW = "arrow"
 
-SHAPE_HEALTH_POTION = "assets/health_potion.gif"  # 128x128
+SHAPE_SHARK = "assets/baby_shark.gif"
+SHAPE_HEALTH_POTION = "assets/health_potion.gif"
 
 all_customized_shapes = {
+    SHAPE_SHARK,
     SHAPE_HEALTH_POTION,
 }
 
