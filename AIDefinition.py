@@ -1,5 +1,6 @@
 from Constants import *
 from Utils import *
+from BattleUnitDefinition import *
 from SkillDefinition import *
 from copy import deepcopy
 
@@ -32,7 +33,7 @@ class AI:
                 else:
                     # print("trying to get way point")
                     b.way_points = get_way_points((bx, by), dest_pos, walls_cor_set)
-                    # print("way point got: {}".format(str(b.way_points)))
+                    print("way point got: {}".format(str(b.way_points)))
                     if b.way_points:
                         # space out the path finding here for enemies
                         # so calculation can be smoother across frames.
@@ -54,12 +55,15 @@ class AI:
 
             if b.last_aggro == 0:
                 x, y = b.battle_unit_data.start_pos
-                angle = 90
-                return {"decision": AI_DECISION_MOVE, "next_stop": (x, y, angle)}
+                return {"decision": AI_DECISION_MOVE, "next_stop": (x, y, 90)}
             elif time.time() - b.last_aggro > 5:
-                dest_pos = b.battle_unit_data.start_pos
-                print("move back to start pos")
-                return move_to_dest(dest_pos)
+                # if already went back home, treat it as never moved
+                if (bx, by) == b.battle_unit_data.start_pos:
+                    b.last_aggro = 0
+                    return {"decision": AI_DECISION_MOVE, "next_stop": (bx, by, 90)}
+                else:
+                    dest_pos = b.battle_unit_data.start_pos
+                    return move_to_dest(dest_pos)
             elif get_dist((bx, by), (tx, ty)) < skill.attack_range and skill.is_ready():
                 return {"decision": AI_DECISION_ATTACK, "skill": skill, "target_cor": (tx, ty)}
             else:

@@ -3,18 +3,27 @@ from AIDefinition import *
 from SkillDefinition import *
 from ColorDefinition import *
 
+# --- ENEMY TYPES ---
+ENEMY_TYPE_BIKER = "biker"
+ENEMY_TYPE_ENFORCER = "enforcer"
+ENEMY_TYPE_FREEZER = "freezer"
+ENEMY_TYPE_FLAMETHROWER = "flamethrower"
+ENEMY_TYPE_SUICIDE_DRONE = "suicide_drone"
+ENEMY_TYPE_UNDERBOSS = "underboss"
+
 PLAYER_BASE_VISUAL_RANGE = 250
 
 # --- SPEED RELATED ---
-SPEED_PLAYER = 2.0
-SPEED_ENEMY_NORMAL = 1.0
-SPEED_ENEMY_FAST = 1.2
-SPEED_ENEMY_VERY_FAST = 1.5
-SPEED_ENEMY_ULTRA_FAST = 2.5
+SPEED_FACTOR = 1.2
+SPEED_PLAYER = 2.0 * SPEED_FACTOR
+SPEED_ENEMY_NORMAL = 1.0 * SPEED_FACTOR
+SPEED_ENEMY_FAST = 1.2 * SPEED_FACTOR
+SPEED_ENEMY_VERY_FAST = 1.5 * SPEED_FACTOR
+SPEED_ENEMY_ULTRA_FAST = 2.5 * SPEED_FACTOR
 
 # --- ATTACK/DEFENSE/HEALTH RELATED ---
 HEALTH_PLAYER = 100
-ATTACK_PLAYER = 10
+ATTACK_PLAYER = 100
 DEFENSE_PLAYER = 0
 # enemy attack has to be higher than player base defense
 HEALTH_ENEMY_VERY_WEAK, ATTACK_ENEMY_VERY_WEAK, DEFENSE_ENEMY_VERY_WEAK = 5, 2, 0
@@ -87,14 +96,14 @@ class BattleUnit:
 
 
 class PlayerUnit(BattleUnit):
-    def __init__(self, health=STANDARD_HEALTH, attack=20, defense=3, speed=SPEED_PLAYER, color=ORANGE, skills=None, health_regen=HEALTH_REGEN_PLAYER):
+    def __init__(self, health=STANDARD_HEALTH, attack=ATTACK_PLAYER, defense=DEFENSE_PLAYER, speed=SPEED_PLAYER, color=ORANGE, skills=None, health_regen=HEALTH_REGEN_PLAYER):
         if skills is None:
             skills = [
-                deepcopy(skill_punch),
+                # deepcopy(skill_punch),
                 # deepcopy(skill_nova),
                 # deepcopy(skill_fire_ball),
                 # deepcopy(skill_ice_ball),
-                # deepcopy(skill_icy_blast),
+                deepcopy(skill_icy_blast),
             ]
         reassign_skill_keys(skills)
         assert len(skills) >= 1
@@ -116,7 +125,7 @@ class PlayerUnit(BattleUnit):
 
 
 class EnemyUnit(BattleUnit):
-    def __init__(self, health, attack, defense, ai_mode=ENFORCER, speed=SPEED_ENEMY_NORMAL, color=GREEN, skills=None, aggro_range=AGGRO_RANGE_FOR_ENEMY_NORMAL, health_regen=0.0):
+    def __init__(self, type, health, attack, defense, ai_mode=ENFORCER, speed=SPEED_ENEMY_NORMAL, color=GREEN, skills=None, aggro_range=AGGRO_RANGE_FOR_ENEMY_NORMAL, health_regen=0.0):
         if skills is None:
             skills = get_skill_list_by_mode(ai_mode)
         assert len(skills) >= 1
@@ -129,6 +138,7 @@ class EnemyUnit(BattleUnit):
             skills=skills,
             health_regen=health_regen
         )
+        self.type = type
         self.aggro_range = aggro_range
         self.left_click_skill_key = skills[0].key
         self.ai = AI(ai_mode, self)
@@ -140,6 +150,7 @@ class EnemyUnit(BattleUnit):
 player_sample = PlayerUnit()
 
 enemy_biker_sample = EnemyUnit(
+    type=ENEMY_TYPE_BIKER,
     health=HEALTH_ENEMY_WEAK,
     attack=ATTACK_ENEMY_WEAK,
     defense=DEFENSE_ENEMY_WEAK,
@@ -148,6 +159,7 @@ enemy_biker_sample = EnemyUnit(
 )
 
 enemy_enforcer_sample = EnemyUnit(
+    type=ENEMY_TYPE_ENFORCER,
     health=HEALTH_ENEMY_NORMAL,
     attack=ATTACK_ENEMY_NORMAL,
     defense=DEFENSE_ENEMY_STRONG,
@@ -156,6 +168,7 @@ enemy_enforcer_sample = EnemyUnit(
 )
 
 enemy_freezer_sample = EnemyUnit(
+    type=ENEMY_TYPE_FREEZER,
     health=HEALTH_ENEMY_NORMAL,
     attack=ATTACK_ENEMY_STRONG,
     defense=DEFENSE_ENEMY_WEAK,
@@ -164,6 +177,7 @@ enemy_freezer_sample = EnemyUnit(
 )
 
 enemy_flamethrower_sample = EnemyUnit(
+    type=ENEMY_TYPE_FLAMETHROWER,
     health=HEALTH_ENEMY_STRONG,
     attack=ATTACK_ENEMY_STRONG,
     defense=DEFENSE_ENEMY_STRONG,
@@ -172,6 +186,7 @@ enemy_flamethrower_sample = EnemyUnit(
 )
 
 enemy_suicide_drone_sample = EnemyUnit(
+    type=ENEMY_TYPE_SUICIDE_DRONE,
     health=HEALTH_ENEMY_VERY_WEAK,
     attack=ATTACK_ENEMY_SUPER_STRONG,
     defense=0,
@@ -182,6 +197,7 @@ enemy_suicide_drone_sample = EnemyUnit(
 )
 
 enemy_underboss_sample = EnemyUnit(
+    type=ENEMY_TYPE_UNDERBOSS,
     health=HEALTH_ENEMY_SUPER_STRONG,
     attack=ATTACK_ENEMY_VERY_STRONG,
     defense=DEFENSE_ENEMY_VERY_STRONG,

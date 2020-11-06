@@ -72,7 +72,7 @@ def get_units_from_layout(layout):
     items = []
     rows = reversed([row for row in layout.split("\n") if row])
     for row_id, row in enumerate(rows):
-        print(str(row))
+        # print(str(row))
         for col_id, v in enumerate(row.strip().split(" ")):
             if v in MAP_UNIT_KEY_TO_SAMPLE_OBJ:
                 x, y = to_map_cor(col_id, row_id)

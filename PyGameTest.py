@@ -5,6 +5,8 @@ from functools import partial
 from copy import deepcopy
 from SkillDefinition import *
 from BattleUnitDefinition import *
+from ShapeDefinition import *
+from LootDefinition import *
 from LevelDefinition import *
 from Utils import *
 from Constants import *
@@ -32,13 +34,15 @@ class GameView:
         self.canvas = self.win.getcanvas()
         self.scroll_ttl = 0
 
+        # register shapes
+        register_all_shapes(win)
+
         # player setup
-        self.player = turtle.Turtle()
+        self.player = turtle.Turtle(SHAPE_TURTLE)
         p = self.player
         p.id = "player_0"
         p.alive = True
         p.speed(0)
-        p.shape("turtle")
         p.color(player.color)
         p.penup()
         self.move_player(player.start_pos[0], player.start_pos[1])
@@ -55,10 +59,9 @@ class GameView:
         # enemy setup
         self.enemies = dict()
         for enemy_id, enemy in enumerate(enemies):
-            e = turtle.Turtle()
+            e = turtle.Turtle(SHAPE_TURTLE)
             e.id = "enemy_" + str(enemy_id)
             e.last_aggro = 0
-            e.shape("turtle")
             e.color(enemy.color)
             e.penup()
             e.goto(enemy.start_pos[0], enemy.start_pos[1])
@@ -173,7 +176,7 @@ class GameView:
         #     print("target pos updated: " + str(p.target_pos))
         #     p.stop = False
         p.target_pos = (target_x, target_y)
-        print("target pos updated: " + str(p.target_pos))
+        # print("target pos updated: " + str(p.target_pos))
         p.stop = False
 
     def attack_with_right_click(self, target_x, target_y):
@@ -216,6 +219,7 @@ class GameView:
     def tick(self):
         # move player
         p = self.player
+        p.shapesize(p.battle_unit_data.get_shape_size())
         x, y, moving_angle = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.battle_unit_data.get_speed(), True)
         # print("x = {}, y = {}, moving_angle = {}".format(str(x), str(y), str(moving_angle)))
         obj_hit = find_first_collision(p, self.walls, (x, y))
@@ -246,7 +250,6 @@ class GameView:
         # enemy ai actions
         for e_id, e in self.enemies.items():
             if e.distance(p.xcor(), p.ycor()) <= e.battle_unit_data.aggro_range:
-                print("refreshing aggro")
                 e.last_aggro = time.time()
             decision = e.battle_unit_data.ai.decide(self.walls_cor_set)
             # print("decision for enemy {} is: {}".format(str(e_id), str(decision)))
@@ -283,9 +286,11 @@ class GameView:
                         added_missile_shards.extend(missile_shards)
                     aggro_list = get_units_within_range(self.enemies, (enemy_hit.xcor(), enemy_hit.ycor()), AGGRO_RANGE_FOR_HIT)
                     for unit in aggro_list:
-                        print("refreshing aggro by hit")
                         unit.last_aggro = time.time()
                     if dead:
+                        # if enemy killed by player's attack, enter loot dropping logic
+                        loot_item = handle_loot_dropping(enemy_hit.battle_unit_data)
+                        self.add_item_to_screen(loot_item, (enemy_hit.xcor(), enemy_hit.ycor()))
                         del self.enemies[enemy_hit.id]
                         print("{} is down, {} left.".format(enemy_hit.id, str(len(self.enemies))))
                 elif "wall_" in obj_hit.id:
@@ -331,7 +336,10 @@ class GameView:
                     if hasattr(skill, "health_burn"):
                         dead = handle_missile_damage(m.owner, m)
                         if dead:
-                            del self.enemies[m.owner.id]
+                            if m.owner.id in self.enemies:
+                                del self.enemies[m.owner.id]
+                            else:
+                                print("killed before suicide could happen")
                 elif "wall_" in obj_hit.id:
                     print("hit wall")
                     wall_hit = obj_hit
@@ -375,6 +383,18 @@ class GameView:
             handle_health_regen(self.player)
         for e_id, e in self.enemies.items():
             handle_health_regen(e)
+
+    def add_item_to_screen(self, item, cor):
+        if item is None:
+            return
+        i = turtle.Turtle(item.shape)
+        i.id = "item_" + str(len(self.items))
+        i.color(item.color)
+        i.penup()
+        i.goto(cor[0], cor[1])
+        i.direction = STOP
+        i.item_unit_data = item
+        self.items[i.id] = i
 
     def update_visibility(self):
         if not ENABLE_WAR_MIST:

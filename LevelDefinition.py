@@ -27,4 +27,4 @@ def get_units_by_level(level):
     elif level == 4:
         return get_units_from_layout(LEVEL_4_LAYOUT)
     else:
-        raise "level %s map is not defined.".format(str(level))
+        raise Exception("level %s map is not defined.".format(str(level)))

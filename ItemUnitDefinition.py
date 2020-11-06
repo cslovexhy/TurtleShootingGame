@@ -1,7 +1,11 @@
 from Constants import *
 from ColorDefinition import *
 from SkillDefinition import *
+from BattleUnitDefinition import *
+from ShapeDefinition import *
 from Utils import *
+
+CONSUMABLE_MINOR_HEALTH_POTION = "Minor Health Potion"
 
 
 class ItemUnit:
@@ -19,13 +23,13 @@ class SkillItemUnit(ItemUnit):
         self.skill_data = deepcopy(skill_data)
 
 
-skill_fire_ball_item_sample = SkillItemUnit(skill_fire_ball)
-
-skill_ice_ball_item_sample = SkillItemUnit(skill_ice_ball)
-
-skill_icy_blast_item_sample = SkillItemUnit(skill_icy_blast)
-
-skill_nova_item_sample = SkillItemUnit(skill_nova)
+class ConsumableItemUnit(ItemUnit):
+    def __init__(self, name, attribute, value, shape, scale=1.0):
+        super().__init__(name, shape, BLACK, scale)
+        # TODO: crappy assert here, need to do a set instead
+        assert(hasattr(player_sample, attribute))
+        self.attribute = attribute
+        self.value = value
 
 
 def handle_item_pick_up(player_data, item_data, bind_skill_callback):
@@ -38,3 +42,23 @@ def handle_item_pick_up(player_data, item_data, bind_skill_callback):
             player_data.skills[new_skill_key] = skill_data
             print("Acquired skill: {}, key = {}".format(str(skill_data.name), str(skill_data.key)))
             bind_skill_callback()
+    elif isinstance(item_data, ConsumableItemUnit):
+        attr_key = item_data.attribute
+        value = item_data.value
+        old_val = getattr(player_data, attr_key)
+        new_val = old_val + value
+        if attr_key == "health":
+            new_val = min(player_data.max_health, new_val)
+        setattr(player_data, attr_key, new_val)
+        print("player {} increased by {}".format(attr_key, str(new_val - old_val)))
+
+
+skill_fire_ball_item_sample = SkillItemUnit(skill_fire_ball)
+
+skill_ice_ball_item_sample = SkillItemUnit(skill_ice_ball)
+
+skill_icy_blast_item_sample = SkillItemUnit(skill_icy_blast)
+
+skill_nova_item_sample = SkillItemUnit(skill_nova)
+
+consumable_item_minor_health_potion_sample = ConsumableItemUnit(CONSUMABLE_MINOR_HEALTH_POTION, "health", 20, SHAPE_HEALTH_POTION)

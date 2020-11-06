@@ -1,6 +1,7 @@
 import time
 from copy import deepcopy
 from ColorDefinition import *
+from ShapeDefinition import *
 
 EFFECT_SLOW_MOVEMENT = "EFFECT_SLOW_MOVEMENT"
 EFFECT_SLOW_ATTACK = "EFFECT_SLOW_ATTACK"
@@ -120,7 +121,7 @@ skill_fire_ball = SimpleRangedSkill(
     flying_speed=2.0,
     conversion=0.7,
     cool_down=1,
-    shape="circle",
+    shape=SHAPE_CIRCLE,
     color=RED,
 )
 
@@ -131,7 +132,7 @@ skill_ice_ball = SimpleRangedSkill(
     flying_speed=1.2,
     conversion=0.5,
     cool_down=2,
-    shape="circle",
+    shape=SHAPE_CIRCLE,
     effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5}},
     color=BLUE,
 )
@@ -143,7 +144,7 @@ skill_punch = SimpleRangedSkill(
     flying_speed=1,
     conversion=1,
     cool_down=0.5,
-    shape="triangle",
+    shape=SHAPE_TRIANGLE,
     color=PURPLE
 )
 
@@ -154,7 +155,7 @@ skill_icy_blast_shard = SimpleRangedSkill(
     flying_speed=1.5,
     conversion=0.45,
     cool_down=None,
-    shape="triangle",
+    shape=SHAPE_TRIANGLE,
     effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5}},
     color=BLUE,
     spin=30
@@ -167,7 +168,7 @@ skill_icy_blast = SimpleRangedSkillWithSplash(
     flying_speed=1.5,
     conversion=0.8,
     cool_down=.5,
-    shape='triangle',
+    shape=SHAPE_TRIANGLE,
     color=BLUE,
     effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5}},
     spin=30,
@@ -181,7 +182,7 @@ skill_suicide_attack = SimpleRangedSkillWithHealthBurn(
     flying_speed=5,
     conversion=1,
     cool_down=999,
-    shape="triangle",
+    shape=SHAPE_TRIANGLE,
     color=WHITE,
     health_burn=999
 )
@@ -193,7 +194,7 @@ skill_nova = SimpleNovaSkill(
     flying_speed=2.0,
     conversion=0.6,
     cool_down=1,
-    shape='arrow',
+    shape=SHAPE_ARROW,
     color=WHITE,
     spin=45
 )
