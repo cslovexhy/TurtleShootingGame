@@ -38,7 +38,7 @@ def handle_item_pick_up(player_data, item_data, bind_skill_callback):
         if skill_data.name not in {s.name for _, s in player_data.skills.items()}:
             new_skill_key = str(len(player_data.skills)+1)
             player_data.skills[new_skill_key] = skill_data
-            print("Acquired skill: {}, key = {}".format(str(skill_data.name), str(skill_data.key)))
+            print("Acquired skill: {}".format(str(skill_data.name)))
             print("player_data.skills = " + str(player_data.skills))
             bind_skill_callback()
         else:

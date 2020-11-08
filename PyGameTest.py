@@ -18,6 +18,11 @@ class GameView:
 
         self.level_complete = False
 
+        self.item_id_auto_increased = 0
+        self.enemy_id_auto_increased = 0
+        self.enemy_missile_id_auto_increased = 0
+        self.player_missile_id_auto_increased = 0
+
         # window setup
         print("init 1")
         self.win = turtle.Screen()
@@ -60,7 +65,7 @@ class GameView:
         self.enemies = dict()
         for enemy_id, enemy in enumerate(enemies):
             e = turtle.Turtle(SHAPE_TURTLE)
-            e.id = "enemy_" + str(enemy_id)
+            e.id = self.get_next_enmey_id()
             e.last_aggro = 0
             e.color(enemy.color)
             e.penup()
@@ -98,7 +103,7 @@ class GameView:
         self.items = dict()
         for item_id, item in enumerate(items):
             i = turtle.Turtle()
-            i.id = "item_" + str(item_id)
+            i.id = self.get_next_item_id()
             i.shape(item.shape)
             i.color(item.color)
             i.penup()
@@ -139,6 +144,26 @@ class GameView:
             time.sleep(SLEEP_INTERVAL)
             # p.direction = STOP
             iter_count += 1
+
+    def get_next_item_id(self):
+        old_id = self.item_id_auto_increased
+        self.item_id_auto_increased += 1
+        return "item_" + str(old_id)
+
+    def get_next_enemy_missile_id(self):
+        old_id = self.enemy_missile_id_auto_increased
+        self.enemy_missile_id_auto_increased += 1
+        return old_id
+
+    def get_next_player_missile_id(self):
+        old_id = self.player_missile_id_auto_increased
+        self.player_missile_id_auto_increased += 1
+        return old_id
+
+    def get_next_enmey_id(self):
+        old_id = self.enemy_id_auto_increased
+        self.enemy_id_auto_increased += 1
+        return "enemy_" + str(old_id)
 
     def bind_skills(self):
         for key in self.player.battle_unit_data.skills:
@@ -184,12 +209,16 @@ class GameView:
         p = self.player
         skill = p.battle_unit_data.skills[p.battle_unit_data.left_click_skill_key]
         if isinstance(skill, SimpleNovaSkill):
-            fire_nova(p, self.missiles)
+            self.fire_nova(p, self.missiles)
         else:
-            fire_missile(p, (target_x, target_y), self.missiles)
+            self.fire_missile(p, (target_x, target_y), self.missiles)
 
     def enemy_attack(self, attacker, target_cor):
-        return fire_missile(attacker, target_cor, self.enemy_missiles)
+        skill = attacker.battle_unit_data.skills[attacker.battle_unit_data.left_click_skill_key]
+        if isinstance(skill, SimpleNovaSkill):
+            self.fire_nova(attacker, self.enemy_missiles)
+        else:
+            self.fire_missile(attacker, target_cor, self.enemy_missiles)
 
     def move_player(self, x, y):
         self.player.goto(x, y)
@@ -295,7 +324,7 @@ class GameView:
                         del self.enemies[enemy_hit.id]
                         print("{} is down, {} left.".format(enemy_hit.id, str(len(self.enemies))))
                 elif "wall_" in obj_hit.id:
-                    print("hit wall")
+                    # print("hit wall")
                     wall_hit = obj_hit
                     dead = handle_missile_damage_on_wall(wall_hit, m)
                     if dead:
@@ -342,7 +371,7 @@ class GameView:
                             else:
                                 print("killed before suicide could happen")
                 elif "wall_" in obj_hit.id:
-                    print("hit wall")
+                    # print("hit wall")
                     wall_hit = obj_hit
                     dead = handle_missile_damage_on_wall(wall_hit, m)
                     if dead:
@@ -389,13 +418,14 @@ class GameView:
         if item is None:
             return
         i = turtle.Turtle(item.shape)
-        i.id = "item_" + str(len(self.items))
+        i.id = self.get_next_item_id()
         i.color(item.color)
         i.penup()
         i.goto(cor[0], cor[1])
         i.direction = STOP
         i.item_unit_data = item
         self.items[i.id] = i
+        print("item added, total item count = " + str(len(self.items)))
 
     def update_visibility(self):
         if not ENABLE_WAR_MIST:
@@ -430,6 +460,79 @@ class GameView:
                     w.color(w.wall_unit_data.color_dim)
                 else:
                     w.hideturtle()
+
+    def fire_missile(self, attacker, target_cor, missile_list, ignore_cool_down=False):
+        p = attacker
+        skill = p.battle_unit_data.skills[p.battle_unit_data.left_click_skill_key]
+        target_x, target_y = target_cor
+        x, y = p.xcor(), p.ycor()
+        if target_x == x and target_y == y:
+            print("need some angle to attack, skip")
+            return False
+        angle = to_int_degree(get_angle_for_vector((x, y), (target_x, target_y)))
+        p.target_pos = (x, y)
+        p.stop = True
+        p.shooting_angle = angle
+
+        now = time.time()
+        if not ignore_cool_down:
+            if not skill.last_used:
+                skill.last_used = now
+            else:
+                time_since_last_use = now - skill.last_used
+                if time_since_last_use > skill.cool_down:
+                    skill.last_used = now
+                else:
+                    print("{} in cool down, wait for {} seconds".format(
+                        skill.name,
+                        str(skill.cool_down - time_since_last_use)
+                    ))
+                    return False
+
+        missile = turtle.Turtle()
+        m = missile
+        m.penup()
+        if p == self.player:
+            m.id = self.get_next_player_missile_id()
+        else:
+            m.id = self.get_next_enemy_missile_id()
+        m.shape(skill.shape)
+        m.color(skill.color)
+        m.goto(x, y)
+        m.orig_pos = (x, y)
+        m.target_pos = (target_x, target_y)
+        m.shapesize(0.5)
+        m.skill_data = skill
+        m.owner = p
+
+        speed_per_sec = MISSILE_BASE_SPEED * FRAME * skill.flying_speed
+        max_flying_time = skill.attack_range / speed_per_sec
+        # print("speed_per_sec = " + str(speed_per_sec) + ", max_flying_time = " + str(max_flying_time))
+        m.ttl = now + max_flying_time
+
+        missile_list[m.id] = m
+
+        return True
+
+    # so far only player can fire this, TODO: allow enemy do this too
+    def fire_nova(self, attacker, missile_list):
+        # here i'm only copying 1 skill for all missiles, hope nothing bad happens.
+        skill = deepcopy(attacker.battle_unit_data.skills[attacker.battle_unit_data.left_click_skill_key])
+        shard_count = skill.shard_count
+        print("shard_count = " + str(shard_count))
+        center = (attacker.xcor(), attacker.ycor())
+        for i in range(shard_count):
+            radius = skill.attack_range
+            angle = to_radian(int(360 / shard_count * i))
+            dest_x = center[0] + math.cos(angle) * radius
+            dest_y = center[1] + math.sin(angle) * radius
+            dest = (dest_x, dest_y)
+            print("dest = " + str(dest))
+            ignore_cool_down = i != 0
+            can_fire = self.fire_missile(attacker, dest, missile_list, ignore_cool_down)
+            if not can_fire:
+                print("nova in cool down")
+                return
 
 
 class CasualGame:

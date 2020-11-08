@@ -106,7 +106,6 @@ class PlayerUnit(BattleUnit):
                 # deepcopy(skill_ice_ball),
                 deepcopy(skill_icy_blast),
             ]
-        reassign_skill_keys(skills)
         assert len(skills) >= 1
         super().__init__(
             health=health,
@@ -137,7 +136,7 @@ class EnemyUnit(BattleUnit):
         )
         self.type = type
         self.aggro_range = aggro_range
-        self.left_click_skill_key = skills[0].key
+        self.left_click_skill_key = '1'
         self.ai = AI(ai_mode, self)
 
     def set_player(self, player):
@@ -211,6 +210,6 @@ enemy_boss_sample = EnemyUnit(
     defense=DEFENSE_ENEMY_VERY_STRONG,
     color=BLACK,
     speed=SPEED_ENEMY_VERY_FAST,
-    skills=deepcopy([skill_poison_dart, skill_fire_dart, skill_icy_blast]),
+    skills=deepcopy([skill_poison_dart, skill_fire_dart, skill_icy_blast, skill_fire_ring]),
     health_regen=HEALTH_REGEN_BOSS
 )

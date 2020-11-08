@@ -175,10 +175,10 @@ def handle_missile_damage(battle_unit, missile):
     bu, m = battle_unit, missile
     damage = max(0, m.owner.battle_unit_data.attack * m.skill_data.conversion - bu.battle_unit_data.defense)
     health = bu.battle_unit_data.health
-    print("attack = {}, conversion = {}, defense = {}, damage = {}, health = {}".format(
-        str(m.owner.battle_unit_data.attack), str(m.skill_data.conversion), str(bu.battle_unit_data.defense), str(damage), str(health)))
+    # print("attack = {}, conversion = {}, defense = {}, damage = {}, health = {}".format(
+    #     str(m.owner.battle_unit_data.attack), str(m.skill_data.conversion), str(bu.battle_unit_data.defense), str(damage), str(health)))
     health = max(0, health - damage)
-    print("health after = " + str(health))
+    print("{} health updated: {}".format(battle_unit.id, str(health)))
     bu.battle_unit_data.health = health
     if health == 0:
         bu.hideturtle()
@@ -193,87 +193,16 @@ def handle_missile_damage_on_wall(wall_unit, missile):
     wu, m = wall_unit, missile
     damage = max(0, m.owner.battle_unit_data.attack * m.skill_data.conversion - wu.wall_unit_data.defense)
     health = wu.wall_unit_data.health
-    print("attack = {}, conversion = {}, defense = {}, damage = {}, health = {}".format(
-        str(m.owner.battle_unit_data.attack), str(m.skill_data.conversion), str(wu.wall_unit_data.defense), str(damage), str(health)))
+    # print("attack = {}, conversion = {}, defense = {}, damage = {}, health = {}".format(
+    #     str(m.owner.battle_unit_data.attack), str(m.skill_data.conversion), str(wu.wall_unit_data.defense), str(damage), str(health)))
     health = max(0, health - damage)
-    print("health after = " + str(health))
+    # print("health after = " + str(health))
     wu.wall_unit_data.health = health
     if health == 0:
         wu.hideturtle()
         return True
     else:
         return False
-
-
-def fire_missile(attacker, target_cor, missile_list, ignore_cool_down=False):
-    p = attacker
-    skill = p.battle_unit_data.skills[p.battle_unit_data.left_click_skill_key]
-    target_x, target_y = target_cor
-    x, y = p.xcor(), p.ycor()
-    if target_x == x and target_y == y:
-        print("need some angle to attack, skip")
-        return False
-    angle = to_int_degree(get_angle_for_vector((x, y), (target_x, target_y)))
-    p.target_pos = (x, y)
-    p.stop = True
-    p.shooting_angle = angle
-
-    now = time.time()
-    if not ignore_cool_down:
-        if not skill.last_used:
-            skill.last_used = now
-        else:
-            time_since_last_use = now - skill.last_used
-            if time_since_last_use > skill.cool_down:
-                skill.last_used = now
-            else:
-                print("{} in cool down, wait for {} seconds".format(
-                    skill.name,
-                    str(skill.cool_down - time_since_last_use)
-                ))
-                return False
-
-    missile = turtle.Turtle()
-    m = missile
-    m.penup()
-    m.id = "missile_" + str(len(missile_list))
-    m.shape(skill.shape)
-    m.color(skill.color)
-    m.goto(x, y)
-    m.orig_pos = (x, y)
-    m.target_pos = (target_x, target_y)
-    m.shapesize(0.5)
-    m.skill_data = skill
-    m.owner = p
-
-    speed_per_sec = MISSILE_BASE_SPEED * FRAME * skill.flying_speed
-    max_flying_time = skill.attack_range / speed_per_sec
-    # print("speed_per_sec = " + str(speed_per_sec) + ", max_flying_time = " + str(max_flying_time))
-    m.ttl = now + max_flying_time
-
-    missile_list[m.id] = m
-
-    return True
-
-
-def fire_nova(attacker, missile_list):
-    # here i'm only copying 1 skill for all missiles, hope nothing bad happens.
-    skill = deepcopy(attacker.battle_unit_data.skills[attacker.battle_unit_data.left_click_skill_key])
-    shard_count = skill.shard_count
-    print("shard_count = " + str(shard_count))
-    center = (attacker.xcor(), attacker.ycor())
-    for i in range(shard_count):
-        radius = skill.attack_range
-        angle = to_radian(int(360 / shard_count * i))
-        dest_x = center[0] + math.cos(angle) * radius
-        dest_y = center[1] + math.sin(angle) * radius
-        dest = (dest_x, dest_y)
-        print("dest = " + str(dest))
-        ignore_cool_down = i != 0
-        can_fire = fire_missile(attacker, dest, missile_list, ignore_cool_down)
-        if not can_fire:
-            print("nova in cool down")
-            return
 
 
 def trigger_splash(battle_unit_attacker, battle_unit_hit, missile):
