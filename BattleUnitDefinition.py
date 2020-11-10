@@ -77,7 +77,7 @@ class BattleUnit:
 
     def add_effects(self, effects):
         for effect_type, effect in effects.items():
-            effect_with_apply_time = copy_effects_with_apply_time(effects[EFFECT_SLOW_MOVEMENT])
+            effect_with_apply_time = copy_effects_with_apply_time(effect)
             self.effects[effect_type] = effect_with_apply_time
             print("effect {} added ".format(str(effect_type)))
 

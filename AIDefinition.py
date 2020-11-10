@@ -40,7 +40,7 @@ class AI:
                 else:
                     # print("trying to get way point")
                     b.way_points = get_way_points((bx, by), dest_pos, walls_cor_set)
-                    print("way point got: {}".format(str(b.way_points)))
+                    # print("way point got: {}".format(str(b.way_points)))
                     if b.way_points:
                         # space out the path finding here for enemies
                         # so calculation can be smoother across frames.

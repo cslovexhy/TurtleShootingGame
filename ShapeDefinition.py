@@ -6,10 +6,16 @@ SHAPE_ARROW = "arrow"
 
 SHAPE_SHARK = "assets/baby_shark.gif"
 SHAPE_HEALTH_POTION = "assets/health_potion.gif"
+SHAPE_BRICK_WALL = "assets/brick.gif"
+SHAPE_STONE_WALL = "assets/stone.gif"
+SHAPE_SNOWFLAKE = "assets/snowflake.gif"
 
 all_customized_shapes = {
     SHAPE_SHARK,
     SHAPE_HEALTH_POTION,
+    SHAPE_BRICK_WALL,
+    SHAPE_STONE_WALL,
+    SHAPE_SNOWFLAKE,
 }
 
 

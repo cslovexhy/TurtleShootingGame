@@ -154,6 +154,31 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
     return None
 
 
+def handle_burn_damage(battle_unit):
+    bu = battle_unit
+    if EFFECT_BURN not in bu.battle_unit_data.effects:
+        return False
+    e = bu.battle_unit_data.effects[EFFECT_BURN]
+    now = time.time()
+    if e[EFFECT_KEY_COUNT] > 0 and (EFFECT_KEY_LAST_PROC_TIME not in e or now - e[EFFECT_KEY_LAST_PROC_TIME] > e[EFFECT_KEY_INTERVAL]):
+        e[EFFECT_KEY_LAST_PROC_TIME] = now
+        e[EFFECT_KEY_COUNT] -= 1
+        damage = e[EFFECT_KEY_DAMAGE]
+        health = bu.battle_unit_data.health
+        health = max(0, health - damage)
+        print("[BURN] {} health updated: {} on {}".format(battle_unit.id, str(health), str(time.time())))
+        bu.battle_unit_data.health = health
+        if health == 0:
+            bu.hideturtle()
+            return True
+        else:
+            bu.shapesize(bu.battle_unit_data.get_shape_size())
+            return False
+    if e[EFFECT_KEY_COUNT] == 0:
+        del bu.battle_unit_data.effects[EFFECT_BURN]
+        print("Effect BURN removed")
+
+
 def handle_health_regen(battle_unit):
     bu = battle_unit
     data = bu.battle_unit_data
@@ -164,9 +189,9 @@ def handle_health_regen(battle_unit):
     now = time.time()
     time_elapsed = min(1.0, now - bu.last_health_regen)
     if time_elapsed >= 1.0:
-        print("health before = " + str(data.health))
+        old_health = data.health
         data.health = min(data.max_health, data.health + data.health_regen)
-        print("health after = " + str(data.health))
+        print("[Regen] {} health {} -> {} ".format(bu.id, str(old_health), str(data.health)))
         bu.last_health_regen = now
         bu.shapesize(data.get_shape_size())
 
@@ -174,11 +199,11 @@ def handle_health_regen(battle_unit):
 def handle_missile_damage(battle_unit, missile):
     bu, m = battle_unit, missile
     damage = max(0, m.owner.battle_unit_data.attack * m.skill_data.conversion - bu.battle_unit_data.defense)
-    health = bu.battle_unit_data.health
+    old_health = health = bu.battle_unit_data.health
     # print("attack = {}, conversion = {}, defense = {}, damage = {}, health = {}".format(
     #     str(m.owner.battle_unit_data.attack), str(m.skill_data.conversion), str(bu.battle_unit_data.defense), str(damage), str(health)))
     health = max(0, health - damage)
-    print("{} health updated: {}".format(battle_unit.id, str(health)))
+    print("[Missile] {} health {} -> {}".format(battle_unit.id, str(old_health), str(health)))
     bu.battle_unit_data.health = health
     if health == 0:
         bu.hideturtle()
@@ -208,12 +233,12 @@ def handle_missile_damage_on_wall(wall_unit, missile):
 def trigger_splash(battle_unit_attacker, battle_unit_hit, missile):
     au, hu, m = battle_unit_attacker, battle_unit_hit, missile
     if hasattr(m, "is_splash") and m.is_splash:
-        print("skip splashing on a splash missile")
+        # print("skip splashing on a splash missile")
         return
 
     skill_data = m.skill_data
     if not isinstance(skill_data, SimpleRangedSkillWithSplash):
-        print("not a splash skill")
+        # print("not a splash skill")
         return
     shard_count = skill_data.shard_count
     center = (hu.xcor(), hu.ycor())
@@ -308,7 +333,7 @@ def find_path(a, b, blocks):
 
 # from a to b, considering walls cannot be passed
 def get_way_points(a, b, walls_cor_set):
-    print("try finding path...")
+    # print("try finding path...")
     result = []
 
     def to_way_point(cor):

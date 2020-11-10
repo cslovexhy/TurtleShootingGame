@@ -88,9 +88,8 @@ class GameView:
         self.walls_cor_set = set()
         self.walls_visited = set()
         for wall_id, wall in enumerate(walls):
-            w = turtle.Turtle()
+            w = turtle.Turtle(wall.shape)
             w.id = "wall_" + str(wall_id)
-            w.shape(wall.shape)
             w.color(wall.color)
             w.penup()
             w.goto(wall.pos[0], wall.pos[1])
@@ -102,9 +101,8 @@ class GameView:
         # item setup
         self.items = dict()
         for item_id, item in enumerate(items):
-            i = turtle.Turtle()
+            i = turtle.Turtle(item.shape)
             i.id = self.get_next_item_id()
-            i.shape(item.shape)
             i.color(item.color)
             i.penup()
             i.goto(item.pos[0], item.pos[1])
@@ -121,6 +119,7 @@ class GameView:
 
         # main loop
         iter_count = 0
+        prev = time.time()
         while True:
             win.update()
             # grace period before window shut down
@@ -143,7 +142,13 @@ class GameView:
                 win.ttl = time.time() + 3
             time.sleep(SLEEP_INTERVAL)
             # p.direction = STOP
-            iter_count += 1
+            now = time.time()
+            if now >= prev + 1:
+                # print("Frame Rate: " + str(iter_count))
+                iter_count = 0
+                prev = now
+            else:
+                iter_count += 1
 
     def get_next_item_id(self):
         old_id = self.item_id_auto_increased
@@ -318,11 +323,7 @@ class GameView:
                     for unit in aggro_list:
                         unit.last_aggro = time.time()
                     if dead:
-                        # if enemy killed by player's attack, enter loot dropping logic
-                        loot_item = handle_loot_dropping(enemy_hit.battle_unit_data)
-                        self.add_item_to_screen(loot_item, (enemy_hit.xcor(), enemy_hit.ycor()))
-                        del self.enemies[enemy_hit.id]
-                        print("{} is down, {} left.".format(enemy_hit.id, str(len(self.enemies))))
+                        self.handle_dead_enemy(enemy_hit)
                 elif "wall_" in obj_hit.id:
                     # print("hit wall")
                     wall_hit = obj_hit
@@ -361,8 +362,7 @@ class GameView:
                     player_hit = obj_hit
                     dead = handle_missile_damage(player_hit, m)
                     if dead:
-                        self.player.alive = False
-                        print("Player down.")
+                        self.handle_dead_player()
                     if hasattr(skill, "health_burn"):
                         dead = handle_missile_damage(m.owner, m)
                         if dead:
@@ -388,10 +388,9 @@ class GameView:
         # why do we need another loop to hide/delete? coz it's not good to delete the iterable while looping through it.
         now = time.time()
 
-        # TODO: here somehow if we hide missile, it stays on the screen sometimes.
-        # and we have to loop through all expired missiles to keep hiding them if not.
-        # this makes processing time increase somewhat linearly over missile generated historically.
         def handle_missile_visibility(missiles):
+            to_remove_set = set()
+            # print("missile count = " + str(len(missiles)))
             for m_id, m in missiles.items():
                 # print("m_id = {}, now = {}, ttl = {}".format(m_id, str(now), str(m.ttl)))
                 if not m.isvisible() or now < m.ttl:
@@ -401,6 +400,10 @@ class GameView:
                 m.setx(WINDOW_X)
                 m.sety(WINDOW_Y)
                 m.hideturtle()
+                to_remove_set.add(m_id)
+
+            for m_id in to_remove_set:
+                del missiles[m_id]
 
         handle_missile_visibility(self.missiles)
         handle_missile_visibility(self.enemy_missiles)
@@ -410,9 +413,20 @@ class GameView:
 
         # handle health regen
         if self.player.alive:
+            if handle_burn_damage(self.player):
+                self.handle_dead_player()
+        if self.player.alive:
             handle_health_regen(self.player)
+
+        dead_enemy_ids = set()
         for e_id, e in self.enemies.items():
-            handle_health_regen(e)
+            if handle_burn_damage(e):
+                dead_enemy_ids.add(e_id)
+            else:
+                handle_health_regen(e)
+
+        for e_id in dead_enemy_ids:
+            self.handle_dead_enemy(self.enemies[e_id])
 
     def add_item_to_screen(self, item, cor):
         if item is None:
@@ -514,6 +528,17 @@ class GameView:
 
         return True
 
+    def handle_dead_enemy(self, enemy_hit):
+        # if enemy killed by player's damage, enter loot dropping logic
+        loot_item = handle_loot_dropping(enemy_hit.battle_unit_data)
+        self.add_item_to_screen(loot_item, (enemy_hit.xcor(), enemy_hit.ycor()))
+        del self.enemies[enemy_hit.id]
+        print("{} is down, {} left.".format(enemy_hit.id, str(len(self.enemies))))
+
+    def handle_dead_player(self):
+        self.player.alive = False
+        print("Player down.")
+
     # so far only player can fire this, TODO: allow enemy do this too
     def fire_nova(self, attacker, missile_list):
         # here i'm only copying 1 skill for all missiles, hope nothing bad happens.
@@ -527,7 +552,7 @@ class GameView:
             dest_x = center[0] + math.cos(angle) * radius
             dest_y = center[1] + math.sin(angle) * radius
             dest = (dest_x, dest_y)
-            print("dest = " + str(dest))
+            # print("dest = " + str(dest))
             ignore_cool_down = i != 0
             can_fire = self.fire_missile(attacker, dest, missile_list, ignore_cool_down)
             if not can_fire:
