@@ -19,8 +19,8 @@ EFFECT_KEY_LAST_PROC_TIME = "last_proc_time"
 EFFECT_KEY_MAP = {
     EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT, EFFECT_KEY_DURATION},
     EFFECT_SLOW_ATTACK: {EFFECT_KEY_PERCENT, EFFECT_KEY_DURATION},  # TODO: slow attack
-    EFFECT_BURN: {EFFECT_KEY_DAMAGE, EFFECT_KEY_INTERVAL, EFFECT_KEY_COUNT},  # TODO: burn damages by fixed health
-    EFFECT_POISON: {EFFECT_KEY_PERCENT, EFFECT_KEY_INTERVAL, EFFECT_KEY_COUNT},  # TODO: poison damages by % health
+    EFFECT_BURN: {EFFECT_KEY_DAMAGE, EFFECT_KEY_INTERVAL, EFFECT_KEY_COUNT},
+    EFFECT_POISON: {EFFECT_KEY_PERCENT, EFFECT_KEY_INTERVAL, EFFECT_KEY_COUNT},
 }
 
 
@@ -131,8 +131,8 @@ skill_ice_ball = SimpleRangedSkill(
 
 skill_punch = SimpleRangedSkill(
     name="Punch",
-    attack_range=150,
-    flying_speed=1,
+    attack_range=100,
+    flying_speed=2,
     conversion=1,
     cool_down=0.5,
     shape=SHAPE_TRIANGLE,
@@ -201,14 +201,32 @@ skill_fire_ring = SimpleNovaSkill(
 )
 
 
+skill_poison_nova = SimpleNovaSkill(
+    name="Poison Nova",
+    attack_range=500,
+    flying_speed=1,
+    conversion=0.1,
+    cool_down=1,
+    shape=SHAPE_CIRCLE,
+    color=DARK_GREEN,
+    effects={EFFECT_POISON: {EFFECT_KEY_PERCENT: 3, EFFECT_KEY_INTERVAL: 2, EFFECT_KEY_COUNT: 3},
+             EFFECT_BURN: {EFFECT_KEY_DAMAGE: 10, EFFECT_KEY_INTERVAL: 2, EFFECT_KEY_COUNT: 3},
+             EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .2, EFFECT_KEY_DURATION: 6}},
+    shard_count=20,
+    spin=25
+)
+
+
 skill_poison_dart = SimpleRangedSkill(
     name="Poison Dart",
     attack_range=300,
     flying_speed=1,
-    conversion=1,
+    conversion=0.2,
     cool_down=1.5,
     shape=SHAPE_TRIANGLE,
     color=DARK_GREEN,
+    effects={EFFECT_POISON: {EFFECT_KEY_PERCENT: 3, EFFECT_KEY_INTERVAL: 2, EFFECT_KEY_COUNT: 3},
+             EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .2, EFFECT_KEY_DURATION: 6}},
     spin=25
 )
 
@@ -220,5 +238,6 @@ skill_fire_dart = SimpleRangedSkill(
     cool_down=1.5,
     shape=SHAPE_TRIANGLE,
     color=RED,
-    spin=25
+    effects={EFFECT_BURN: {EFFECT_KEY_DAMAGE: 2, EFFECT_KEY_INTERVAL: 2, EFFECT_KEY_COUNT: 2}},
+    spin=25,
 )

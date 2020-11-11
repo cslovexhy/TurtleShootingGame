@@ -78,8 +78,11 @@ class BattleUnit:
     def add_effects(self, effects):
         for effect_type, effect in effects.items():
             effect_with_apply_time = copy_effects_with_apply_time(effect)
+            if effect_type not in self.effects:
+                print("effect {} added".format(str(effect_type)))
+            else:
+                print("effect {} replaced ".format(str(effect_type)))
             self.effects[effect_type] = effect_with_apply_time
-            print("effect {} added ".format(str(effect_type)))
 
     def get_speed(self):
         if EFFECT_SLOW_MOVEMENT not in self.effects:
@@ -93,7 +96,7 @@ class BattleUnit:
             return self.speed
 
         # handle effect active case
-        return self.speed * e[EFFECT_KEY_PERCENT]
+        return self.speed * (1 - e[EFFECT_KEY_PERCENT] / 100)
 
 
 class PlayerUnit(BattleUnit):
@@ -104,7 +107,8 @@ class PlayerUnit(BattleUnit):
                 # deepcopy(skill_nova),
                 # deepcopy(skill_fire_ball),
                 # deepcopy(skill_ice_ball),
-                deepcopy(skill_icy_blast),
+                # deepcopy(skill_icy_blast),
+                deepcopy(skill_poison_nova),
             ]
         assert len(skills) >= 1
         super().__init__(

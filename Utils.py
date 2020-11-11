@@ -154,29 +154,63 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
     return None
 
 
-def handle_burn_damage(battle_unit):
-    bu = battle_unit
-    if EFFECT_BURN not in bu.battle_unit_data.effects:
+def handle_burn_effect(bu):
+    data = bu.battle_unit_data
+    effects = data.effects
+    key = EFFECT_BURN
+    if key not in effects:
         return False
-    e = bu.battle_unit_data.effects[EFFECT_BURN]
+    e = effects[key]
     now = time.time()
     if e[EFFECT_KEY_COUNT] > 0 and (EFFECT_KEY_LAST_PROC_TIME not in e or now - e[EFFECT_KEY_LAST_PROC_TIME] > e[EFFECT_KEY_INTERVAL]):
         e[EFFECT_KEY_LAST_PROC_TIME] = now
         e[EFFECT_KEY_COUNT] -= 1
         damage = e[EFFECT_KEY_DAMAGE]
-        health = bu.battle_unit_data.health
+        old_health = health = data.health
         health = max(0, health - damage)
-        print("[BURN] {} health updated: {} on {}".format(battle_unit.id, str(health), str(time.time())))
-        bu.battle_unit_data.health = health
+        print("[{}] {} health updated: {} -> {} on {}".format(key, bu.id, str(old_health), str(health), str(time.time())))
+        data.health = health
         if health == 0:
             bu.hideturtle()
             return True
         else:
-            bu.shapesize(bu.battle_unit_data.get_shape_size())
+            bu.shapesize(data.get_shape_size())
             return False
     if e[EFFECT_KEY_COUNT] == 0:
-        del bu.battle_unit_data.effects[EFFECT_BURN]
-        print("Effect BURN removed")
+        del effects[key]
+        print("Effect {} removed".format(key))
+
+
+def handle_poison_effect(bu):
+    data = bu.battle_unit_data
+    effects = data.effects
+    key = EFFECT_POISON
+    if key not in effects:
+        return False
+    e = effects[key]
+    now = time.time()
+    if e[EFFECT_KEY_COUNT] > 0 and (EFFECT_KEY_LAST_PROC_TIME not in e or now - e[EFFECT_KEY_LAST_PROC_TIME] > e[EFFECT_KEY_INTERVAL]):
+        e[EFFECT_KEY_LAST_PROC_TIME] = now
+        e[EFFECT_KEY_COUNT] -= 1
+        damage = round(data.health * e[EFFECT_KEY_PERCENT] / 100)
+        old_health = health = data.health
+        health = max(0, health - damage)
+        print("[{}] {} health updated: {} -> {} on {}".format(key, bu.id, str(old_health), str(health), str(time.time())))
+        data.health = health
+        if health == 0:
+            bu.hideturtle()
+            return True
+        else:
+            bu.shapesize(data.get_shape_size())
+            return False
+    if e[EFFECT_KEY_COUNT] == 0:
+        del effects[key]
+        print("Effect {} removed".format(key))
+
+
+def handle_effect_damage(battle_unit):
+    return handle_poison_effect(battle_unit) or \
+           handle_burn_effect(battle_unit)
 
 
 def handle_health_regen(battle_unit):

@@ -413,14 +413,14 @@ class GameView:
 
         # handle health regen
         if self.player.alive:
-            if handle_burn_damage(self.player):
+            if handle_effect_damage(self.player):
                 self.handle_dead_player()
         if self.player.alive:
             handle_health_regen(self.player)
 
         dead_enemy_ids = set()
         for e_id, e in self.enemies.items():
-            if handle_burn_damage(e):
+            if handle_effect_damage(e):
                 dead_enemy_ids.add(e_id)
             else:
                 handle_health_regen(e)
