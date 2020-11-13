@@ -19,8 +19,10 @@ def rand_f(f1, f2):
 def to_int_degree(theta):
     return int(theta / math.pi * 180)
 
+
 def to_radian(theta):
     return theta / 180 * math.pi
+
 
 def get_angle_for_vector(o, t):
     ox, oy = o
@@ -301,7 +303,7 @@ def trigger_splash(battle_unit_attacker, battle_unit_hit, missile):
         sm.skill_data = skill
         sm.owner = au
 
-        speed_per_sec = MISSILE_BASE_SPEED * FRAME * skill.flying_speed
+        speed_per_sec = get_missile_base_speed() * FRAME * skill.flying_speed
         max_flying_time = skill.attack_range / speed_per_sec
         sm.ttl = time.time() + max_flying_time
 

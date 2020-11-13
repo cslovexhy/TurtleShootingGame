@@ -144,6 +144,7 @@ class GameView:
             # p.direction = STOP
             now = time.time()
             if now >= prev + 1:
+                update_frame(iter_count + 1)
                 # print("Frame Rate: " + str(iter_count))
                 iter_count = 0
                 prev = now
@@ -255,7 +256,7 @@ class GameView:
         # move player
         p = self.player
         p.shapesize(p.battle_unit_data.get_shape_size())
-        x, y, moving_angle = get_new_cors(p, BATTLE_UNIT_BASE_SPEED * p.battle_unit_data.get_speed(), True)
+        x, y, moving_angle = get_new_cors(p, get_battle_unit_base_speed() * p.battle_unit_data.get_speed(), True)
         # print("x = {}, y = {}, moving_angle = {}".format(str(x), str(y), str(moving_angle)))
         obj_hit = find_first_collision(p, self.walls, (x, y))
         if obj_hit is None:
@@ -303,7 +304,7 @@ class GameView:
             if not m.isvisible():
                 continue
             skill = m.skill_data
-            dist = MISSILE_BASE_SPEED * skill.flying_speed
+            dist = get_missile_base_speed() * skill.flying_speed
             x, y, _ = get_new_cors(m, dist)
             orig_x, orig_y = m.orig_pos
             dx, dy = x - orig_x, y - orig_y
@@ -348,7 +349,7 @@ class GameView:
             if not m.isvisible():
                 continue
             skill = m.skill_data
-            dist = MISSILE_BASE_SPEED * skill.flying_speed
+            dist = get_missile_base_speed() * skill.flying_speed
             x, y, _ = get_new_cors(m, dist)
             orig_x, orig_y = m.orig_pos
             dx, dy = x - orig_x, y - orig_y
@@ -519,7 +520,7 @@ class GameView:
         m.skill_data = skill
         m.owner = p
 
-        speed_per_sec = MISSILE_BASE_SPEED * FRAME * skill.flying_speed
+        speed_per_sec = get_missile_base_speed() * FRAME * skill.flying_speed
         max_flying_time = skill.attack_range / speed_per_sec
         # print("speed_per_sec = " + str(speed_per_sec) + ", max_flying_time = " + str(max_flying_time))
         m.ttl = now + max_flying_time

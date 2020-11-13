@@ -103,12 +103,12 @@ class PlayerUnit(BattleUnit):
     def __init__(self, health=STANDARD_HEALTH, attack=ATTACK_PLAYER, defense=DEFENSE_PLAYER, speed=SPEED_PLAYER, color=ORANGE, skills=None, health_regen=HEALTH_REGEN_PLAYER):
         if skills is None:
             skills = [
-                # deepcopy(skill_punch),
-                # deepcopy(skill_nova),
+                deepcopy(skill_punch),
                 # deepcopy(skill_fire_ball),
                 # deepcopy(skill_ice_ball),
                 # deepcopy(skill_icy_blast),
-                deepcopy(skill_poison_nova),
+                # deepcopy(skill_nova),
+                # deepcopy(skill_poison_nova),
             ]
         assert len(skills) >= 1
         super().__init__(

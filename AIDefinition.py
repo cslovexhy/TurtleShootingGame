@@ -54,7 +54,7 @@ class AI:
                 else:
                     # print("has way point, next one = {}".format(str(b.way_points[-1])))
                     b.target_pos = deepcopy(b.way_points[-1])
-                max_step = min(BATTLE_UNIT_BASE_SPEED * self.battle_unit.get_speed(), get_dist(b.orig_pos, b.target_pos))
+                max_step = min(get_battle_unit_base_speed() * self.battle_unit.get_speed(), get_dist(b.orig_pos, b.target_pos))
                 next_stop = get_new_cors(b, max_step)
                 # print("next stop = {}".format(str(next_stop)))
 
