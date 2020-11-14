@@ -10,13 +10,13 @@
     * training ground
 - More item dropping
     * consumable item pickup logic (done)
-    * attack + 1 item
-    * defense + 1 item
+    * attack + 1 item (done)
+    * defense + 1 item (done)
     * equipment definition and pickup logic
     * sword + X attack
     * armor + X defense
     * shoe + X speed
-
+    * skill item effect piling (1st one give base count, 2nd one and on increase the same skill's power, such as shard count or conversion rate increase, write a function "increase_power" for each skill class)
 
 Not sure:
 - Player visibility & Fog? [aborted because of performance/UX issue]

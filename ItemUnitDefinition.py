@@ -6,6 +6,8 @@ from ShapeDefinition import *
 from Utils import *
 
 CONSUMABLE_MINOR_HEALTH_POTION = "Minor Health Potion"
+CONSUMABLE_MINOR_ATTACK_PACK = "Minor Attack Pack"
+CONSUMABLE_MINOR_DEFENSE_PACK = "Minor Defense Pack"
 
 
 class ItemUnit:
@@ -51,7 +53,7 @@ def handle_item_pick_up(player_data, item_data, bind_skill_callback):
         if attr_key == "health":
             new_val = min(player_data.max_health, new_val)
         setattr(player_data, attr_key, new_val)
-        print("player {} increased by {}".format(attr_key, str(new_val - old_val)))
+        print("player {} increased by {}, {} -> {}".format(attr_key, str(new_val - old_val), str(old_val), str(new_val)))
 
 
 skill_fire_ball_item_sample = SkillItemUnit(skill_fire_ball)
@@ -67,3 +69,7 @@ skill_poison_nova_item_sample = SkillItemUnit(skill_poison_nova)
 skill_frost_nova_item_sample = SkillItemUnit(skill_frost_nova)
 
 consumable_item_minor_health_potion_sample = ConsumableItemUnit(CONSUMABLE_MINOR_HEALTH_POTION, "health", 20, SHAPE_HEALTH_POTION)
+
+consumable_item_minor_attack_pack_sample = ConsumableItemUnit(CONSUMABLE_MINOR_ATTACK_PACK, "attack", 2, SHAPE_ATTACK_PACK)
+
+consumable_item_minor_defense_pack_sample = ConsumableItemUnit(CONSUMABLE_MINOR_DEFENSE_PACK, "defense", 1, SHAPE_DEFENSE_PACK)

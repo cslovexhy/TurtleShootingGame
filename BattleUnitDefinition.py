@@ -23,7 +23,7 @@ SPEED_ENEMY_ULTRA_FAST = 2.5 * SPEED_FACTOR
 
 # --- ATTACK/DEFENSE/HEALTH RELATED ---
 HEALTH_PLAYER = 100
-ATTACK_PLAYER = 10
+ATTACK_PLAYER = 0
 DEFENSE_PLAYER = 2
 # enemy attack has to be higher than player base defense
 HEALTH_ENEMY_VERY_WEAK, ATTACK_ENEMY_VERY_WEAK, DEFENSE_ENEMY_VERY_WEAK = 5, 2, 0
@@ -103,8 +103,8 @@ class PlayerUnit(BattleUnit):
     def __init__(self, health=STANDARD_HEALTH, attack=ATTACK_PLAYER, defense=DEFENSE_PLAYER, speed=SPEED_PLAYER, color=ORANGE, skills=None, health_regen=HEALTH_REGEN_PLAYER):
         if skills is None:
             skills = [
-                deepcopy(skill_punch),
-                # deepcopy(skill_fire_ball),
+                # deepcopy(skill_punch),
+                deepcopy(skill_fire_ball),
                 # deepcopy(skill_ice_ball),
                 # deepcopy(skill_icy_blast),
                 # deepcopy(skill_nova),

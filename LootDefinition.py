@@ -3,7 +3,9 @@ from ItemUnitDefinition import *
 from BattleUnitDefinition import *
 
 key_to_item = {
-    CONSUMABLE_MINOR_HEALTH_POTION: consumable_item_minor_health_potion_sample
+    CONSUMABLE_MINOR_HEALTH_POTION: consumable_item_minor_health_potion_sample,
+    CONSUMABLE_MINOR_ATTACK_PACK: consumable_item_minor_attack_pack_sample,
+    CONSUMABLE_MINOR_DEFENSE_PACK: consumable_item_minor_defense_pack_sample,
 }
 
 loot_matrix = {
@@ -20,6 +22,8 @@ loot_matrix = {
         (CONSUMABLE_MINOR_HEALTH_POTION, 50)
     ],
     ENEMY_TYPE_SUICIDE_DRONE: [
+        (CONSUMABLE_MINOR_ATTACK_PACK, 50),
+        (CONSUMABLE_MINOR_DEFENSE_PACK, 50),
     ],
     ENEMY_TYPE_UNDERBOSS: [
         (CONSUMABLE_MINOR_HEALTH_POTION, 100)
