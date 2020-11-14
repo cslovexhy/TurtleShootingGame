@@ -16,6 +16,8 @@ class GameView:
 
     def __init__(self, dim, level, player, enemies, walls, items):
 
+        self.delete_count = 0
+
         self.level_complete = False
 
         self.item_id_auto_increased = 0
@@ -393,7 +395,7 @@ class GameView:
             m.goto(x, y)
 
         for m in added_missile_shards:
-            m_id = "missile_" + str(len(self.missiles))
+            m_id = self.get_next_player_missile_id()
             m.id = m_id
             self.missiles[m_id] = m
 
@@ -442,9 +444,10 @@ class GameView:
         # why do we need another loop to hide/delete? coz it's not good to delete the iterable while looping through it.
         now = time.time()
 
-        def handle_missile_visibility(missiles):
+        def handle_missile_visibility(missiles, is_player=False):
             to_remove_set = set()
-            # print("missile count = " + str(len(missiles)))
+            # if is_player:
+                # print("missile count = {}, deleted = {}".format(str(self.player_missile_id_auto_increased), str(self.delete_count)))
             for m_id, m in missiles.items():
                 # print("m_id = {}, now = {}, ttl = {}".format(m_id, str(now), str(m.ttl)))
                 if not m.isvisible() or now < m.ttl:
@@ -458,8 +461,10 @@ class GameView:
 
             for m_id in to_remove_set:
                 del missiles[m_id]
+                # if is_player:
+                #     self.delete_count += 1
 
-        handle_missile_visibility(self.missiles)
+        handle_missile_visibility(self.missiles, True)
         handle_missile_visibility(self.enemy_missiles)
 
         # handle player visibility

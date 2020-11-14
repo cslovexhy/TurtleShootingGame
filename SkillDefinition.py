@@ -74,14 +74,15 @@ class SimpleRangedSkill(Skill):
         id = obj_hit.id
         is_stone_wall = "wall_" in id and isinstance(obj_hit.wall_unit_data, StoneWallUnit)
         if is_stone_wall:
-            print("is stone wall")
+            # print("is stone wall")
             return False
         else:
-            print(vars(obj_hit))
-            print("is not stone wall")
+            pass
+            # print("not stone wall: " + str(vars(obj_hit)))
+            # print("is not stone wall")
         result = id in self.visited
         self.visited.add(id)
-        print("obj_id = {}, visited = {}".format(str(self.visited), result))
+        # print("obj_id = {}, visited = {}".format(str(self.visited), result))
         return result
 
 
