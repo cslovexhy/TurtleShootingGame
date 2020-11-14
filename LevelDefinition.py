@@ -5,7 +5,7 @@ from MapDefinition import *
 
 MIN_LEVEL = 1
 MAX_LEVEL = 4
-START_LEVEL = 1
+START_LEVEL = 4
 
 MAX_GAME_TIME = 3600
 

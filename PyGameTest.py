@@ -147,7 +147,7 @@ class GameView:
             now = time.time()
             if now >= prev + 1:
                 update_frame(iter_count + 1)
-                # print("Frame Rate: " + str(iter_count))
+                print("Frame Rate: " + str(iter_count))
                 iter_count = 0
                 prev = now
             else:

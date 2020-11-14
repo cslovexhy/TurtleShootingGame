@@ -16,12 +16,14 @@ class WallUnit:
 
 class BrickWallUnit(WallUnit):
     def __init__(self):
-        super().__init__(shape=SHAPE_BRICK_WALL)
+        # super().__init__(shape=SHAPE_BRICK_WALL)
+        super().__init__()
 
 
 class StoneWallUnit(WallUnit):
     def __init__(self):
-        super().__init__(health=99999, defense=99999, shape=SHAPE_STONE_WALL)
+        # super().__init__(health=99999, defense=99999, shape=SHAPE_STONE_WALL)
+        super().__init__(health=99999, defense=99999, color=SILVER)
 
 
 brick_sample = BrickWallUnit()
