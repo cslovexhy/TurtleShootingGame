@@ -64,4 +64,6 @@ skill_nova_item_sample = SkillItemUnit(skill_nova)
 
 skill_poison_nova_item_sample = SkillItemUnit(skill_poison_nova)
 
+skill_frost_nova_item_sample = SkillItemUnit(skill_frost_nova)
+
 consumable_item_minor_health_potion_sample = ConsumableItemUnit(CONSUMABLE_MINOR_HEALTH_POTION, "health", 20, SHAPE_HEALTH_POTION)

@@ -23,8 +23,8 @@ SPEED_ENEMY_ULTRA_FAST = 2.5 * SPEED_FACTOR
 
 # --- ATTACK/DEFENSE/HEALTH RELATED ---
 HEALTH_PLAYER = 100
-ATTACK_PLAYER = 30
-DEFENSE_PLAYER = 10
+ATTACK_PLAYER = 7
+DEFENSE_PLAYER = 2
 # enemy attack has to be higher than player base defense
 HEALTH_ENEMY_VERY_WEAK, ATTACK_ENEMY_VERY_WEAK, DEFENSE_ENEMY_VERY_WEAK = 5, 2, 0
 HEALTH_ENEMY_WEAK, ATTACK_ENEMY_WEAK, DEFENSE_ENEMY_WEAK = 20, 5, 1
@@ -96,7 +96,7 @@ class BattleUnit:
             return self.speed
 
         # handle effect active case
-        return self.speed * (1 - e[EFFECT_KEY_PERCENT] / 100)
+        return self.speed * (1 - e[EFFECT_KEY_PERCENT])
 
 
 class PlayerUnit(BattleUnit):
@@ -140,6 +140,7 @@ class EnemyUnit(BattleUnit):
         )
         self.type = type
         self.aggro_range = aggro_range
+        self.shape=SHAPE_TURTLE
         self.left_click_skill_key = '1'
         self.ai = AI(ai_mode, self)
 
@@ -149,6 +150,15 @@ class EnemyUnit(BattleUnit):
 
 player_sample = PlayerUnit()
 
+
+# Summoned enemy types
+def get_summoned_sample(enemy_unit):
+    new_unit = deepcopy(enemy_unit)
+    new_unit.aggro_range = 99999
+    return new_unit
+
+
+# Basic enemy types
 enemy_biker_sample = EnemyUnit(
     type=ENEMY_TYPE_BIKER,
     health=HEALTH_ENEMY_WEAK,
@@ -196,6 +206,12 @@ enemy_suicide_drone_sample = EnemyUnit(
     skills=deepcopy([skill_suicide_attack])
 )
 
+skill_summon_biker = SimpleSummonSkill(name="Summon biker", cool_down=10, battle_unit=get_summoned_sample(enemy_biker_sample), count=2, attack_range=300)
+skill_summon_enforcer = SimpleSummonSkill(name="Summon enforcer", cool_down=10, battle_unit=get_summoned_sample(enemy_enforcer_sample), count=2, attack_range=300)
+skill_summon_freezer = SimpleSummonSkill(name="Summon freezer", cool_down=10, battle_unit=get_summoned_sample(enemy_freezer_sample), count=2, attack_range=300)
+skill_summon_flamethrower = SimpleSummonSkill(name="Summon flamethrower", cool_down=10, battle_unit=get_summoned_sample(enemy_flamethrower_sample), count=2, attack_range=300)
+skill_summon_suicide_drone = SimpleSummonSkill(name="Summon suicide_drone", cool_down=10, battle_unit=get_summoned_sample(enemy_suicide_drone_sample), count=2, attack_range=300)
+
 enemy_underboss_sample = EnemyUnit(
     type=ENEMY_TYPE_UNDERBOSS,
     health=HEALTH_ENEMY_SUPER_STRONG,
@@ -203,7 +219,7 @@ enemy_underboss_sample = EnemyUnit(
     defense=DEFENSE_ENEMY_VERY_STRONG,
     color=PURPLE,
     speed=SPEED_ENEMY_VERY_FAST,
-    skills=deepcopy([skill_fire_ball, skill_ice_ball]),
+    skills=deepcopy([skill_summon_biker]),
     health_regen=HEALTH_REGEN_BOSS
 )
 
@@ -212,8 +228,20 @@ enemy_boss_sample = EnemyUnit(
     health=HEALTH_ENEMY_SUPER_STRONG * 2,
     attack=ATTACK_ENEMY_VERY_STRONG,
     defense=DEFENSE_ENEMY_VERY_STRONG,
+    color=BLUE,
+    speed=SPEED_ENEMY_VERY_FAST,
+    skills=deepcopy([skill_icy_blast, skill_frost_nova]),
+    health_regen=HEALTH_REGEN_BOSS
+)
+
+enemy_kingpin_sample = EnemyUnit(
+    type=ENEMY_TYPE_UNDERBOSS,
+    health=HEALTH_ENEMY_SUPER_STRONG * 5,
+    attack=ATTACK_ENEMY_VERY_STRONG,
+    defense=DEFENSE_ENEMY_VERY_STRONG,
     color=BLACK,
     speed=SPEED_ENEMY_VERY_FAST,
-    skills=deepcopy([skill_poison_dart, skill_fire_dart, skill_icy_blast, skill_fire_ring]),
-    health_regen=HEALTH_REGEN_BOSS
+    skills=deepcopy([skill_poison_dart, skill_fire_dart, skill_icy_blast, skill_fire_ring, skill_poison_nova, skill_nova]),
+    health_regen=HEALTH_REGEN_BOSS,
+    aggro_range=AGGRO_RANGE_FOR_ENEMY_TOWER
 )

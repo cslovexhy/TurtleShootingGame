@@ -52,6 +52,19 @@ class SimpleRangedSkill(Skill):
         self.spin = spin
 
 
+class SimpleSummonSkill(Skill):
+    def __init__(self, name, attack_range, cool_down, battle_unit, count=1):
+        super().__init__(
+            name=name,
+            cool_down=cool_down,
+        )
+        self.attack_range = attack_range
+        self.battle_unit = battle_unit
+        self.shape = battle_unit.shape
+        self.color = battle_unit.color
+        self.count = count
+
+
 class SimpleRangedSkillWithSplash(SimpleRangedSkill):
     def __init__(self, name, attack_range, flying_speed, conversion, cool_down, shape, color, effects=None, spin=30, shard_count=3, shard_data=None):
         super().__init__(
@@ -187,6 +200,20 @@ skill_nova = SimpleNovaSkill(
 )
 
 
+skill_frost_nova = SimpleNovaSkill(
+    name="Frost Nova",
+    attack_range=250,
+    flying_speed=2.0,
+    conversion=0.6,
+    cool_down=1,
+    shape=SHAPE_ARROW,
+    color=BLUE,
+    effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5},
+             EFFECT_BURN: {EFFECT_KEY_DAMAGE: 10, EFFECT_KEY_INTERVAL: 2, EFFECT_KEY_COUNT: 3}},
+    spin=45
+)
+
+
 skill_fire_ring = SimpleNovaSkill(
     name="Fire Ring",
     attack_range=700,
@@ -241,3 +268,13 @@ skill_fire_dart = SimpleRangedSkill(
     effects={EFFECT_BURN: {EFFECT_KEY_DAMAGE: 2, EFFECT_KEY_INTERVAL: 2, EFFECT_KEY_COUNT: 2}},
     spin=25,
 )
+
+
+# cannot circle back from BattleUnitDefinition's samples and create skills here, would cause some bad loop.
+def create_summon_skill(name, cool_down, battle_unit, count):
+    return SimpleSummonSkill(
+        name=name,
+        cool_down=cool_down,
+        battle_unit=battle_unit,
+        count=count,
+    )

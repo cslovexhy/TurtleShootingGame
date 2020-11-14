@@ -65,7 +65,7 @@ class GameView:
         self.enemies = dict()
         for enemy_id, enemy in enumerate(enemies):
             e = turtle.Turtle(SHAPE_TURTLE)
-            e.id = self.get_next_enmey_id()
+            e.id = self.get_next_enemy_id()
             e.last_aggro = 0
             e.color(enemy.color)
             e.penup()
@@ -166,7 +166,7 @@ class GameView:
         self.player_missile_id_auto_increased += 1
         return old_id
 
-    def get_next_enmey_id(self):
+    def get_next_enemy_id(self):
         old_id = self.enemy_id_auto_increased
         self.enemy_id_auto_increased += 1
         return "enemy_" + str(old_id)
@@ -221,10 +221,53 @@ class GameView:
 
     def enemy_attack(self, attacker, target_cor):
         skill = attacker.battle_unit_data.skills[attacker.battle_unit_data.left_click_skill_key]
-        if isinstance(skill, SimpleNovaSkill):
+        if isinstance(skill, SimpleSummonSkill):
+            print("skill.battle_unit.type = " + str(skill.battle_unit.type))
+            return self.add_summoned_enemy(skill, target_cor)
+        elif isinstance(skill, SimpleNovaSkill):
             self.fire_nova(attacker, self.enemy_missiles)
         else:
             self.fire_missile(attacker, target_cor, self.enemy_missiles)
+        return []
+
+    def add_summoned_enemy(self, skill, target_cor):
+
+        now = time.time()
+        if not skill.last_used:
+            skill.last_used = now
+        else:
+            time_since_last_use = now - skill.last_used
+            if time_since_last_use > skill.cool_down:
+                skill.last_used = now
+            else:
+                print("{} in cool down, wait for {} seconds".format(
+                    skill.name,
+                    str(skill.cool_down - time_since_last_use)
+                ))
+                return []
+
+        enemy_sample = skill.battle_unit
+        enemy_sample.start_pos = target_cor
+        new_enemies = []
+        for i in range(skill.count):
+            enemy = deepcopy(enemy_sample)
+            enemy.set_player(self.player.battle_unit_data)
+            e = turtle.Turtle(enemy.shape)
+            e.last_aggro = 0
+            e.color(enemy.color)
+            e.penup()
+            e.goto(enemy.start_pos[0], enemy.start_pos[1])
+            e.prev_pos = deepcopy(enemy.start_pos)
+            e.target_pos = deepcopy(enemy.start_pos)
+            e.orig_pos = deepcopy(enemy.start_pos)
+            e.shapesize(enemy.get_shape_size())
+            e.direction = STOP
+            e.battle_unit_data = enemy
+            enemy.ui = e
+            print("e.battle_unit_data = " + str(vars(e.battle_unit_data)))
+            print("e.battle_unit_data.ui = " + str(vars(e.battle_unit_data.ui)))
+            new_enemies.append(e)
+        return new_enemies
 
     def move_player(self, x, y):
         self.player.goto(x, y)
@@ -284,6 +327,7 @@ class GameView:
             p.stop = True
 
         # enemy ai actions
+        new_enemies = []
         for e_id, e in self.enemies.items():
             if e.distance(p.xcor(), p.ycor()) <= e.battle_unit_data.aggro_range:
                 e.last_aggro = time.time()
@@ -291,12 +335,20 @@ class GameView:
             # print("decision for enemy {} is: {}".format(str(e_id), str(decision)))
             if decision['decision'] == AI_DECISION_ATTACK:
                 target_cor = decision['target_cor']
-                self.enemy_attack(e, target_cor)
+                summoned_enemies = self.enemy_attack(e, target_cor)
+                new_enemies.extend(summoned_enemies)
             elif decision['decision'] == AI_DECISION_MOVE:
                 next_x, next_y, angle = decision['next_stop']
                 e.prev_pos = (e.xcor(), e.ycor())
                 e.goto(next_x, next_y)
                 e.setheading(angle)
+
+        # if summoned new enemies, need to add them here, cannot modify self.enemies while looping it.
+        print("added {} new enemies".format(str(len(new_enemies))))
+        for e in new_enemies:
+            e.id = self.get_next_enemy_id()
+            print("next id = " + str(e.id))
+            self.enemies[e.id] = e
 
         # move player missiles
         added_missile_shards = []
