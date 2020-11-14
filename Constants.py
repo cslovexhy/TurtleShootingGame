@@ -31,5 +31,5 @@ def get_missile_base_speed():
 
 def update_frame(value):
     global FRAME
-    print("FRAME updated to: " + str(value))
+    # print("FRAME updated to: " + str(value))
     FRAME = value

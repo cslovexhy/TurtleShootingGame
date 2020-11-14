@@ -1,7 +1,8 @@
-import time
+import time, random
 from copy import deepcopy
 from ColorDefinition import *
 from ShapeDefinition import *
+from WallUnitDefinition import *
 
 EFFECT_SLOW_MOVEMENT = "EFFECT_SLOW_MOVEMENT"
 EFFECT_SLOW_ATTACK = "EFFECT_SLOW_ATTACK"
@@ -50,6 +51,38 @@ class SimpleRangedSkill(Skill):
         self.shape = shape
         self.color = color
         self.spin = spin
+        self.visited = set()
+
+    def should_penetrate(self, obj_hit):
+        # TODO: change back to wall
+        is_wall = "wall_" in obj_hit.id and isinstance(obj_hit.wall_unit_data, WallUnit)
+        if is_wall:
+            return False
+        value = random.randint(0, 99)
+        if self.shape == SHAPE_ARROW:
+            return value < 50
+        elif self.shape == SHAPE_TRIANGLE:
+            return value < 35
+        elif self.shape == SHAPE_SQUARE:
+            return value < 20
+        elif self.shape == SHAPE_CIRCLE:
+            return value < 10
+        else:
+            return False
+
+    def is_visited(self, obj_hit):
+        id = obj_hit.id
+        is_stone_wall = "wall_" in id and isinstance(obj_hit.wall_unit_data, StoneWallUnit)
+        if is_stone_wall:
+            print("is stone wall")
+            return False
+        else:
+            print(vars(obj_hit))
+            print("is not stone wall")
+        result = id in self.visited
+        self.visited.add(id)
+        print("obj_id = {}, visited = {}".format(str(self.visited), result))
+        return result
 
 
 class SimpleSummonSkill(Skill):

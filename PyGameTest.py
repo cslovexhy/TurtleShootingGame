@@ -344,7 +344,7 @@ class GameView:
                 e.setheading(angle)
 
         # if summoned new enemies, need to add them here, cannot modify self.enemies while looping it.
-        print("added {} new enemies".format(str(len(new_enemies))))
+        # print("added {} new enemies".format(str(len(new_enemies))))
         for e in new_enemies:
             e.id = self.get_next_enemy_id()
             print("next id = " + str(e.id))
@@ -364,7 +364,7 @@ class GameView:
 
             # collision on enemy or wall
             obj_hit = find_first_collision(m, combine_map(self.enemies, self.walls), (x, y))
-            if obj_hit is not None:
+            if obj_hit is not None and not skill.is_visited(obj_hit):
                 if "enemy_" in obj_hit.id:
                     print("hit enemy")
                     enemy_hit = obj_hit
@@ -385,7 +385,8 @@ class GameView:
                         self.walls_cor_set.remove(self.walls[wall_hit.id].wall_unit_data.pos)
                         del self.walls[wall_hit.id]
                         print("{} is down.".format(wall_hit.id))
-                m.ttl = 0
+                if not skill.should_penetrate(obj_hit):
+                    m.ttl = 0
             elif math.sqrt(dx * dx + dy * dy) >= skill.attack_range:
                 m.ttl = 0
 
@@ -409,7 +410,7 @@ class GameView:
 
             # collision on enemy or wall, TODO: wall
             obj_hit = find_first_collision(m, combine_map({p.id: p}, self.walls), (x, y))
-            if obj_hit is not None:
+            if obj_hit is not None and not skill.is_visited(obj_hit):
                 if "player_" in obj_hit.id:
                     print("hit player")
                     player_hit = obj_hit
@@ -431,8 +432,8 @@ class GameView:
                         self.walls_cor_set.remove(self.walls[wall_hit.id].wall_unit_data.pos)
                         del self.walls[wall_hit.id]
                         print("{} is down.".format(wall_hit.id))
-
-                m.ttl = 0
+                if not skill.should_penetrate(obj_hit):
+                    m.ttl = 0
             elif math.sqrt(dx * dx + dy * dy) >= skill.attack_range:
                 m.ttl = 0
 
@@ -534,9 +535,10 @@ class GameView:
         target_x, target_y = target_cor
         x, y = p.xcor(), p.ycor()
         if target_x == x and target_y == y:
-            print("need some angle to attack, skip")
-            return False
-        angle = to_int_degree(get_angle_for_vector((x, y), (target_x, target_y)))
+            print("target is on same cor as attacker, set angle = 0")
+            angle = 0
+        else:
+            angle = to_int_degree(get_angle_for_vector((x, y), (target_x, target_y)))
         p.target_pos = (x, y)
         p.stop = True
         p.shooting_angle = angle
@@ -569,7 +571,7 @@ class GameView:
         m.orig_pos = (x, y)
         m.target_pos = (target_x, target_y)
         m.shapesize(0.5)
-        m.skill_data = skill
+        m.skill_data = deepcopy(skill)
         m.owner = p
 
         speed_per_sec = get_missile_base_speed() * FRAME * skill.flying_speed

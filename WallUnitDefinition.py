@@ -5,7 +5,7 @@ from copy import deepcopy
 
 
 class WallUnit:
-    def __init__(self, health=5, defense=0, color=CHOCOLATE, shape=SHAPE_SQUARE):
+    def __init__(self, health=1, defense=0, color=CHOCOLATE, shape=SHAPE_SQUARE):
         self.max_health = health
         self.health = health
         self.defense = defense
