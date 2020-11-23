@@ -1,7 +1,10 @@
+import os
+
+FRAME_KEY = "FRAME"
+
 # numbers here needs to be 40*N, otherwise path-finding algorithm will not work
 WINDOW_X, WINDOW_Y = 1400, 760
 
-FRAME = 13
 MAX_SHAPE_PCT = 2.0
 MIN_SHAPE_PCT = .4
 STANDARD_HEALTH = 100
@@ -19,17 +22,21 @@ ENABLE_CANVAS_MOVING = False
 ENABLE_WAR_MIST = False
 
 
+def get_frame():
+    if FRAME_KEY not in os.environ:
+        os.environ[FRAME_KEY] = str(13.0)
+    return float(os.environ[FRAME_KEY])
+
+
+def update_frame(value):
+    os.environ[FRAME_KEY] = str(value)
+
+
 def get_battle_unit_base_speed():
-    base_speed = BATTLE_UNIT_BASE_SPEED / FRAME
+    base_speed = BATTLE_UNIT_BASE_SPEED / get_frame()
     # print("base speed = " + str(base_speed))
     return base_speed
 
 
 def get_missile_base_speed():
-    return MISSILE_BASE_SPEED / FRAME
-
-
-def update_frame(value):
-    global FRAME
-    # print("FRAME updated to: " + str(value))
-    FRAME = value
+    return MISSILE_BASE_SPEED / get_frame()

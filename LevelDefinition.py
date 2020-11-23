@@ -4,8 +4,8 @@ from WallUnitDefinition import *
 from MapDefinition import *
 
 MIN_LEVEL = 1
-MAX_LEVEL = 4
-START_LEVEL = 1
+MAX_LEVEL = 5
+START_LEVEL = 4
 
 MAX_GAME_TIME = 3600
 
@@ -26,5 +26,7 @@ def get_units_by_level(level):
         return get_units_from_layout(LEVEL_3_LAYOUT)
     elif level == 4:
         return get_units_from_layout(LEVEL_4_LAYOUT)
+    elif level == 5:
+        return get_units_from_layout(LEVEL_5_LAYOUT)
     else:
         raise Exception("level %s map is not defined.".format(str(level)))

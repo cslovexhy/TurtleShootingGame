@@ -130,9 +130,9 @@ def find_first_collision(moving_obj, potential_target_map, new_cors):
         # this is guaranteed by making sure angles from both ends of the line segment < 90 degrees
         aa, bb, cc = a * a, b * b, c * c
         if cc + aa > bb and cc + bb > aa and get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "curr") <= min_collision_dist:
-            print("tx, ty = ({}, {}), a = {}, b = {}, c = {}, aa = {}, bb = {}, cc = {}, dist_dot_to_line = {}, min_collision_dist = {}".format(
-                str(tx), str(ty), str(a), str(b), str(c), str(aa), str(bb), str(cc), str(get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "curr")), str(min_collision_dist)
-            ))
+            # print("tx, ty = ({}, {}), a = {}, b = {}, c = {}, aa = {}, bb = {}, cc = {}, dist_dot_to_line = {}, min_collision_dist = {}".format(
+            #     str(tx), str(ty), str(a), str(b), str(c), str(aa), str(bb), str(cc), str(get_dist_dot_to_line((tx, ty), (ox, oy), (nx, ny), t_id, "curr")), str(min_collision_dist)
+            # ))
             # print("return 2")
             return t
 
@@ -303,7 +303,7 @@ def trigger_splash(battle_unit_attacker, battle_unit_hit, missile):
         sm.skill_data = skill
         sm.owner = au
 
-        speed_per_sec = get_missile_base_speed() * FRAME * skill.flying_speed
+        speed_per_sec = get_missile_base_speed() * get_frame() * skill.flying_speed
         max_flying_time = skill.attack_range / speed_per_sec
         sm.ttl = time.time() + max_flying_time
 

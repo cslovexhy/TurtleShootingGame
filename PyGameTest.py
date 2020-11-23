@@ -45,7 +45,7 @@ class GameView:
         register_all_shapes(win)
 
         # player setup
-        self.player = turtle.Turtle(SHAPE_SHARK)
+        self.player = turtle.Turtle(SHAPE_TURTLE)
         p = self.player
         p.id = "player_0"
         p.alive = True
@@ -145,13 +145,11 @@ class GameView:
             time.sleep(SLEEP_INTERVAL)
             # p.direction = STOP
             now = time.time()
-            if now >= prev + 1:
-                update_frame(iter_count + 1)
-                print("Frame Rate: " + str(iter_count))
-                iter_count = 0
-                prev = now
-            else:
-                iter_count += 1
+            update_frame(1 / (now - prev))
+            prev = now
+            iter_count += 1
+            if iter_count % 10 == 0:
+                print("FRAME_RATE: " + str(get_frame()))
 
     def get_next_item_id(self):
         old_id = self.item_id_auto_increased
@@ -194,7 +192,7 @@ class GameView:
 
     def pick_up_item(self, item_id):
         player_data = self.player.battle_unit_data
-        handle_item_pick_up(player_data, self.items[item_id].item_unit_data, self.bind_skills)
+        handle_item_pick_up(player_data, self.items[item_id].item_unit_data, self.bind_skills, self.select_skill)
         item = self.items[item_id]
         item.hideturtle()
         del self.items[item_id]
@@ -579,7 +577,7 @@ class GameView:
         m.skill_data = deepcopy(skill)
         m.owner = p
 
-        speed_per_sec = get_missile_base_speed() * FRAME * skill.flying_speed
+        speed_per_sec = get_missile_base_speed() * get_frame() * skill.flying_speed
         max_flying_time = skill.attack_range / speed_per_sec
         # print("speed_per_sec = " + str(speed_per_sec) + ", max_flying_time = " + str(max_flying_time))
         m.ttl = now + max_flying_time

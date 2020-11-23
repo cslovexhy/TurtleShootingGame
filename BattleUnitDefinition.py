@@ -10,6 +10,8 @@ ENEMY_TYPE_FREEZER = "freezer"
 ENEMY_TYPE_FLAMETHROWER = "flamethrower"
 ENEMY_TYPE_SUICIDE_DRONE = "suicide_drone"
 ENEMY_TYPE_UNDERBOSS = "underboss"
+ENEMY_TYPE_BOSS = "boss"
+ENEMY_TYPE_KINGPIN = "kingpin"
 
 PLAYER_BASE_VISUAL_RANGE = 250
 
@@ -23,15 +25,15 @@ SPEED_ENEMY_ULTRA_FAST = 2.5 * SPEED_FACTOR
 
 # --- ATTACK/DEFENSE/HEALTH RELATED ---
 HEALTH_PLAYER = 100
-ATTACK_PLAYER = 0
+ATTACK_PLAYER = 10
 DEFENSE_PLAYER = 2
 # enemy attack has to be higher than player base defense
 HEALTH_ENEMY_VERY_WEAK, ATTACK_ENEMY_VERY_WEAK, DEFENSE_ENEMY_VERY_WEAK = 5, 2, 0
 HEALTH_ENEMY_WEAK, ATTACK_ENEMY_WEAK, DEFENSE_ENEMY_WEAK = 20, 5, 1
 HEALTH_ENEMY_NORMAL, ATTACK_ENEMY_NORMAL, DEFENSE_ENEMY_NORMAL = 40, 7, 2
 HEALTH_ENEMY_STRONG, ATTACK_ENEMY_STRONG, DEFENSE_ENEMY_STRONG = 60, 10, 3
-HEALTH_ENEMY_VERY_STRONG, ATTACK_ENEMY_VERY_STRONG, DEFENSE_ENEMY_VERY_STRONG = 100, 15, 5
-HEALTH_ENEMY_SUPER_STRONG, ATTACK_ENEMY_SUPER_STRONG, DEFENSE_ENEMY_SUPER_STRONG = 200, 30, 10
+HEALTH_ENEMY_VERY_STRONG, ATTACK_ENEMY_VERY_STRONG, DEFENSE_ENEMY_VERY_STRONG = 100, 13, 5
+HEALTH_ENEMY_SUPER_STRONG, ATTACK_ENEMY_SUPER_STRONG, DEFENSE_ENEMY_SUPER_STRONG = 200, 20, 10
 
 HEALTH_REGEN_PLAYER = 2.0
 HEALTH_REGEN_ENEMY_NORMAL = 0.0
@@ -103,8 +105,8 @@ class PlayerUnit(BattleUnit):
     def __init__(self, health=STANDARD_HEALTH, attack=ATTACK_PLAYER, defense=DEFENSE_PLAYER, speed=SPEED_PLAYER, color=ORANGE, skills=None, health_regen=HEALTH_REGEN_PLAYER):
         if skills is None:
             skills = [
-                # deepcopy(skill_punch),
-                deepcopy(skill_fire_ball),
+                deepcopy(skill_punch),
+                # deepcopy(skill_fire_ball),
                 # deepcopy(skill_ice_ball),
                 # deepcopy(skill_icy_blast),
                 # deepcopy(skill_nova),
@@ -224,7 +226,7 @@ enemy_underboss_sample = EnemyUnit(
 )
 
 enemy_boss_sample = EnemyUnit(
-    type=ENEMY_TYPE_UNDERBOSS,
+    type=ENEMY_TYPE_BOSS,
     health=HEALTH_ENEMY_SUPER_STRONG * 2,
     attack=ATTACK_ENEMY_VERY_STRONG,
     defense=DEFENSE_ENEMY_VERY_STRONG,
@@ -235,7 +237,7 @@ enemy_boss_sample = EnemyUnit(
 )
 
 enemy_kingpin_sample = EnemyUnit(
-    type=ENEMY_TYPE_UNDERBOSS,
+    type=ENEMY_TYPE_KINGPIN,
     health=HEALTH_ENEMY_SUPER_STRONG * 5,
     attack=ATTACK_ENEMY_VERY_STRONG,
     defense=DEFENSE_ENEMY_VERY_STRONG,
