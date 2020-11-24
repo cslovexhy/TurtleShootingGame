@@ -98,6 +98,9 @@ class SimpleSummonSkill(Skill):
         self.color = battle_unit.color
         self.count = count
 
+    def increase_power(self):
+        self.count += 1
+
 
 class SimpleRangedSkillWithSplash(SimpleRangedSkill):
     def __init__(self, name, attack_range, flying_speed, conversion, cool_down, shape, color, effects=None, spin=30, shard_count=3, shard_data=None):
@@ -115,6 +118,10 @@ class SimpleRangedSkillWithSplash(SimpleRangedSkill):
         self.shard_count = shard_count
         self.shard_data = shard_data
 
+    def increase_power(self):
+        self.conversion += 0.1
+        self.shard_count += 1
+
 
 class SimpleRangedSkillWithHealthBurn(SimpleRangedSkill):
     def __init__(self, name, attack_range, flying_speed, conversion, cool_down, shape, color, effects=None, spin=30, health_burn=999):
@@ -131,6 +138,9 @@ class SimpleRangedSkillWithHealthBurn(SimpleRangedSkill):
         )
         self.health_burn = health_burn
 
+    def increase_power(self):
+        self.conversion += 0.1
+
 
 class SimpleNovaSkill(SimpleRangedSkill):
     def __init__(self, name, attack_range, flying_speed, conversion, cool_down, shape, color, effects=None, spin=30, shard_count=16):
@@ -146,6 +156,31 @@ class SimpleNovaSkill(SimpleRangedSkill):
             spin=spin,
         )
         self.shard_count = shard_count
+
+    def increase_power(self):
+        self.conversion += 0.1
+        self.shard_count += 1
+
+
+class SimpleMultiShotSkill(SimpleRangedSkill):
+    def __init__(self, name, attack_range, flying_speed, conversion, cool_down, shape, color, effects=None, spin=30, shard_count=16):
+        super().__init__(
+            name=name,
+            attack_range=attack_range,
+            flying_speed=flying_speed,
+            conversion=conversion,
+            cool_down=cool_down,
+            shape=shape,
+            color=color,
+            effects=effects,
+            spin=spin,
+        )
+        assert(shard_count >= 2)
+        self.shard_count = shard_count
+
+    def increase_power(self):
+        self.conversion += 0.1
+        self.shard_count += 1
 
 
 def copy_effects_with_apply_time(effect):
@@ -230,7 +265,7 @@ skill_nova = SimpleNovaSkill(
     cool_down=1,
     shape=SHAPE_ARROW,
     color=WHITE,
-    spin=45
+    spin=45,
 )
 
 
@@ -244,7 +279,8 @@ skill_frost_nova = SimpleNovaSkill(
     color=BLUE,
     effects={EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .5, EFFECT_KEY_DURATION: 1.5},
              EFFECT_BURN: {EFFECT_KEY_DAMAGE: 10, EFFECT_KEY_INTERVAL: 2, EFFECT_KEY_COUNT: 3}},
-    spin=45
+    spin=45,
+    shard_count=3
 )
 
 
@@ -301,6 +337,18 @@ skill_fire_dart = SimpleRangedSkill(
     color=RED,
     effects={EFFECT_BURN: {EFFECT_KEY_DAMAGE: 2, EFFECT_KEY_INTERVAL: 2, EFFECT_KEY_COUNT: 2}},
     spin=25,
+)
+
+skill_multi_shot = SimpleMultiShotSkill(
+    name="Multi Shot",
+    attack_range=400,
+    flying_speed=3.5,
+    conversion=0.8,
+    cool_down=0.3,
+    shape=SHAPE_TRIANGLE,
+    color=PURPLE,
+    shard_count=3,
+    spin=45
 )
 
 

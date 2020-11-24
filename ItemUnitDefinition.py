@@ -37,7 +37,8 @@ class ConsumableItemUnit(ItemUnit):
 def handle_item_pick_up(player_data, item_data, bind_skill_callback, select_skill_callback):
     if isinstance(item_data, SkillItemUnit):
         skill_data = item_data.skill_data
-        if skill_data.name not in {s.name for _, s in player_data.skills.items()}:
+        name_to_key_map = {s.name: skill_key for skill_key, s in player_data.skills.items()}
+        if skill_data.name not in name_to_key_map:
             new_skill_key = str(len(player_data.skills)+1)
             player_data.skills[new_skill_key] = skill_data
             print("Acquired skill: {}".format(str(skill_data.name)))
@@ -45,7 +46,12 @@ def handle_item_pick_up(player_data, item_data, bind_skill_callback, select_skil
             bind_skill_callback()
             select_skill_callback(new_skill_key)
         else:
-            print("Already had this skill, skip")
+            print("Already had this skill, increase power")
+            skill_data.increase_power()
+            skill_key = name_to_key_map[skill_data.name]
+            select_skill_callback(skill_key)
+            player_data.skills[skill_key].increase_power()
+
     elif isinstance(item_data, ConsumableItemUnit):
         attr_key = item_data.attribute
         value = item_data.value

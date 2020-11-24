@@ -111,7 +111,9 @@ def get_units_from_layout(layout):
     return player, enemies, walls, items
 
 
-LEVEL_1_LAYOUT = """
+all_levels = dict()
+
+all_levels[1] = """
 s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s
 s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s
 s . . . . 4 4 4 4 4 4 4 4 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s
@@ -153,7 +155,7 @@ s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
 s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s
 """
 
-LEVEL_2_LAYOUT = """
+all_levels[2] = """
 s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s
 s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s
 s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s
@@ -195,7 +197,7 @@ s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
 s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s
 """
 
-LEVEL_3_LAYOUT = """
+all_levels[3] = """
 s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s
 s . . . . . . . . . . . . . . . b b . . . . s . . . . . . . . . . . . . . . . . . . . . . . s . . . . . . . . . . . . . . . . . 4 . . . . s
 s . . . . . . . . . . . . . . . b b . . I . s . . . . . . . . . . . . . . . . . . . . . . . s . . . . . . . . . . . . . . . . . . . B . . s
@@ -237,7 +239,7 @@ s . . . . . . . . . . . . . . . . . . . . . s . . . . . . . . . . . . . . . . . 
 s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s
 """
 
-LEVEL_4_LAYOUT = """
+all_levels[4] = """
 s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s
 s . . . . . . . . . . s b b . . . . . . . . . . . . . . b b s b b b . . . . b b b b b b b . . . . . . . . . . . . . . . . . . . . . . . . s
 s . . . . . . . . . . s b b . . . . . . . . . . . . . . b b s b . b . b b . b b b b b b b . b b . . . . . . . . . . . . . . . . 0 . b b . s
@@ -279,7 +281,7 @@ s . . . s . . . . . . s . . s b b b b b b b b b b b b b b b b b b b b b s . . . 
 s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s
 """
 
-LEVEL_5_LAYOUT = """
+all_levels[5] = """
 s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s s
 s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s
 s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s
@@ -300,7 +302,7 @@ s . . . . . . . N . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
 s . . . . . . . . . . . p . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s
 s . . . . . . . P . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s 
 s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s
-s . . . . . . . V . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s
+s . . . . . . . V . V . V . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s
 s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s
 s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s
 s . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . s

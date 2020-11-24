@@ -5,7 +5,7 @@ from MapDefinition import *
 
 MIN_LEVEL = 1
 MAX_LEVEL = 5
-START_LEVEL = 4
+START_LEVEL = 5
 
 MAX_GAME_TIME = 3600
 
@@ -18,15 +18,7 @@ def validate_level(level):
 
 def get_units_by_level(level):
     validate_level(level)
-    if level == 1:
-        return get_units_from_layout(LEVEL_1_LAYOUT)
-    elif level == 2:
-        return get_units_from_layout(LEVEL_2_LAYOUT)
-    elif level == 3:
-        return get_units_from_layout(LEVEL_3_LAYOUT)
-    elif level == 4:
-        return get_units_from_layout(LEVEL_4_LAYOUT)
-    elif level == 5:
-        return get_units_from_layout(LEVEL_5_LAYOUT)
-    else:
+    if level not in all_levels:
         raise Exception("level %s map is not defined.".format(str(level)))
+    level_map = all_levels[level]
+    return get_units_from_layout(level_map)

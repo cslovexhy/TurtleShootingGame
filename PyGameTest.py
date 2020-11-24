@@ -214,10 +214,13 @@ class GameView:
     def attack_with_right_click(self, target_x, target_y):
         p = self.player
         skill = p.battle_unit_data.skills[p.battle_unit_data.left_click_skill_key]
+        target_cor = (target_x, target_y)
         if isinstance(skill, SimpleNovaSkill):
-            self.fire_nova(p, self.missiles)
+            self.fire_nova(p, target_cor, self.missiles)
+        elif isinstance(skill, SimpleMultiShotSkill):
+            self.fire_multi_shot(p, target_cor, self.missiles)
         else:
-            self.fire_missile(p, (target_x, target_y), self.missiles)
+            self.fire_missile(p, target_cor, self.missiles)
 
     def enemy_attack(self, attacker, target_cor):
         skill = attacker.battle_unit_data.skills[attacker.battle_unit_data.left_click_skill_key]
@@ -226,6 +229,8 @@ class GameView:
             return self.add_summoned_enemy(skill, target_cor)
         elif isinstance(skill, SimpleNovaSkill):
             self.fire_nova(attacker, self.enemy_missiles)
+        elif isinstance(skill, SimpleMultiShotSkill):
+            self.fire_multi_shot(attacker, target_cor, self.enemy_missiles)
         else:
             self.fire_missile(attacker, target_cor, self.enemy_missiles)
         return []
@@ -532,6 +537,17 @@ class GameView:
                 else:
                     w.hideturtle()
 
+    def handle_dead_enemy(self, enemy_hit):
+        # if enemy killed by player's damage, enter loot dropping logic
+        loot_item = handle_loot_dropping(enemy_hit.battle_unit_data)
+        self.add_item_to_screen(loot_item, (enemy_hit.xcor(), enemy_hit.ycor()))
+        del self.enemies[enemy_hit.id]
+        print("{} is down, {} left.".format(enemy_hit.id, str(len(self.enemies))))
+
+    def handle_dead_player(self):
+        self.player.alive = False
+        print("Player down.")
+
     def fire_missile(self, attacker, target_cor, missile_list, ignore_cool_down=False):
         p = attacker
         skill = p.battle_unit_data.skills[p.battle_unit_data.left_click_skill_key]
@@ -544,7 +560,6 @@ class GameView:
             angle = to_int_degree(get_angle_for_vector((x, y), (target_x, target_y)))
         p.target_pos = (x, y)
         p.stop = True
-        p.shooting_angle = angle
 
         now = time.time()
         if not ignore_cool_down:
@@ -584,31 +599,28 @@ class GameView:
 
         missile_list[m.id] = m
 
+        p.shooting_angle = angle
+
         return True
 
-    def handle_dead_enemy(self, enemy_hit):
-        # if enemy killed by player's damage, enter loot dropping logic
-        loot_item = handle_loot_dropping(enemy_hit.battle_unit_data)
-        self.add_item_to_screen(loot_item, (enemy_hit.xcor(), enemy_hit.ycor()))
-        del self.enemies[enemy_hit.id]
-        print("{} is down, {} left.".format(enemy_hit.id, str(len(self.enemies))))
-
-    def handle_dead_player(self):
-        self.player.alive = False
-        print("Player down.")
-
     # so far only player can fire this, TODO: allow enemy do this too
-    def fire_nova(self, attacker, missile_list):
+    def fire_nova(self, attacker, target_cor, missile_list):
         # here i'm only copying 1 skill for all missiles, hope nothing bad happens.
         skill = deepcopy(attacker.battle_unit_data.skills[attacker.battle_unit_data.left_click_skill_key])
         shard_count = skill.shard_count
         print("shard_count = " + str(shard_count))
         center = (attacker.xcor(), attacker.ycor())
+
+        if center == target_cor:
+            angle = attacker.shooting_angle
+        else:
+            angle = to_int_degree(get_angle_for_vector(center, target_cor))
+
         for i in range(shard_count):
             radius = skill.attack_range
-            angle = to_radian(int(360 / shard_count * i))
-            dest_x = center[0] + math.cos(angle) * radius
-            dest_y = center[1] + math.sin(angle) * radius
+            radian = to_radian(int(360 / shard_count * i))
+            dest_x = center[0] + math.cos(radian) * radius
+            dest_y = center[1] + math.sin(radian) * radius
             dest = (dest_x, dest_y)
             # print("dest = " + str(dest))
             ignore_cool_down = i != 0
@@ -617,6 +629,44 @@ class GameView:
                 print("nova in cool down")
                 return
 
+        attacker.shooting_angle = angle
+
+    # so far only player can fire this, TODO: allow enemy do this too
+    def fire_multi_shot(self, attacker, target_cor, missile_list):
+        # here i'm only copying 1 skill for all missiles, hope nothing bad happens.
+        skill = deepcopy(attacker.battle_unit_data.skills[attacker.battle_unit_data.left_click_skill_key])
+        shard_count = skill.shard_count
+        print("shard_count = " + str(shard_count))
+        center = (attacker.xcor(), attacker.ycor())
+        if center == target_cor:
+            angle = attacker.shooting_angle
+        else:
+            angle = to_int_degree(get_angle_for_vector(center, target_cor))
+
+        min_dist, max_dist = 100, 400
+        min_angle_span, max_angle_span = 15, 90
+        dist = max(min_dist, min(max_dist, get_dist(center, target_cor)))
+        # angle span should be within [15, 90] for dist from [400, 100], adjust this based on UX
+        angle_span = max_angle_span - (max_angle_span - min_angle_span) / (max_dist - min_dist) * (dist - min_dist)
+        print("dist = {}, angle_span = {}".format(str(dist), str(angle_span)))
+
+        angle_start, angle_end = angle - angle_span / 2, angle + angle_span / 2
+        angle_delta = angle_span / (shard_count - 1)
+
+        for i in range(shard_count):
+            radius = skill.attack_range
+            radian = to_radian(angle_start + i * angle_delta)
+            dest_x = center[0] + math.cos(radian) * radius
+            dest_y = center[1] + math.sin(radian) * radius
+            dest = (dest_x, dest_y)
+            # print("dest = " + str(dest))
+            ignore_cool_down = i != 0
+            can_fire = self.fire_missile(attacker, dest, missile_list, ignore_cool_down)
+            if not can_fire:
+                print("multi shot in cool down")
+                return
+
+        attacker.shooting_angle = angle
 
 class CasualGame:
 
