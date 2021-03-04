@@ -34,13 +34,16 @@ def network_call(value):
     folder_path = get_folder_path(value)
     command = "wget http://100.26.188.62/audiobooks/{} -O {}/{}".format(
         str(value), folder_path, str(value))
-    os.system(command)
+    command2 = "wget http://ecsse-servi-k68kpn4k963r-9f73418f498daf1e.elb.us-west-2.amazonaws.com/ping -O {}/{}".format(
+        folder_path, str(value)
+    )
+    os.system(command2)
 
 
 args = sys.argv
 
 if len(args) != 3:
-    raise Exception("wrong argument")
+    raise Exception("wrong argument, must be: python3 stress.py [stress_count] [thread_pool_size]")
 
 count = int(args[1])
 thread_pool_size = int(args[2])
