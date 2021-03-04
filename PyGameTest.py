@@ -228,7 +228,7 @@ class GameView:
             print("skill.battle_unit.type = " + str(skill.battle_unit.type))
             return self.add_summoned_enemy(skill, target_cor)
         elif isinstance(skill, SimpleNovaSkill):
-            self.fire_nova(attacker, self.enemy_missiles)
+            self.fire_nova(attacker, target_cor, self.enemy_missiles)
         elif isinstance(skill, SimpleMultiShotSkill):
             self.fire_multi_shot(attacker, target_cor, self.enemy_missiles)
         else:
@@ -668,15 +668,20 @@ class GameView:
 
         attacker.shooting_angle = angle
 
+
 class CasualGame:
 
     def __init__(self):
         self.dim = (WINDOW_X, WINDOW_Y)
 
         for level in range(START_LEVEL, MAX_LEVEL+1):
-            self.player, self.enemies, self.walls, self.items = get_units_by_level(level)
+            player, self.enemies, self.walls, self.items = get_units_by_level(level)
+            if level != START_LEVEL:
+                player.update_data(self.player)
+            else:
+                self.player = player
             print("Initiating level {}".format(str(level)))
-            self.view = GameView(self.dim, level, self.player, self.enemies, self.walls, self.items)
+            self.view = GameView(self.dim, level, player, self.enemies, self.walls, self.items)
             if not self.view.level_complete:
                 print("level {} failed, game over.".format(str(level)))
                 break

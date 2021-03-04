@@ -54,7 +54,6 @@ class SimpleRangedSkill(Skill):
         self.visited = set()
 
     def should_penetrate(self, obj_hit):
-        # TODO: change back to wall
         is_wall = "wall_" in obj_hit.id and isinstance(obj_hit.wall_unit_data, WallUnit)
         if is_wall:
             return False
@@ -87,7 +86,7 @@ class SimpleRangedSkill(Skill):
 
 
 class SimpleSummonSkill(Skill):
-    def __init__(self, name, attack_range, cool_down, battle_unit, count=1):
+    def __init__(self, name, cool_down, battle_unit, attack_range=250, count=1):
         super().__init__(
             name=name,
             cool_down=cool_down,
@@ -191,7 +190,7 @@ def copy_effects_with_apply_time(effect):
 
 skill_fire_ball = SimpleRangedSkill(
     name="Fire Ball",
-    attack_range=250,
+    attack_range=300,
     flying_speed=2.0,
     conversion=1.0,
     cool_down=1,
@@ -266,6 +265,7 @@ skill_nova = SimpleNovaSkill(
     shape=SHAPE_ARROW,
     color=WHITE,
     spin=45,
+    shard_count=3
 )
 
 
@@ -344,13 +344,26 @@ skill_multi_shot = SimpleMultiShotSkill(
     attack_range=400,
     flying_speed=3.5,
     conversion=0.8,
-    cool_down=0.3,
+    cool_down=2,
     shape=SHAPE_TRIANGLE,
     color=PURPLE,
     shard_count=3,
     spin=45
 )
 
+skill_poison_barrage = SimpleMultiShotSkill(
+    name="Poison Barrage",
+    attack_range=400,
+    flying_speed=3.5,
+    conversion=0.5,
+    cool_down=0.3,
+    shape=SHAPE_TRIANGLE,
+    color=DARK_GREEN,
+    shard_count=3,
+    effects={EFFECT_POISON: {EFFECT_KEY_PERCENT: 3, EFFECT_KEY_INTERVAL: 2, EFFECT_KEY_COUNT: 3},
+             EFFECT_SLOW_MOVEMENT: {EFFECT_KEY_PERCENT: .2, EFFECT_KEY_DURATION: 6}},
+    spin=45
+)
 
 # cannot circle back from BattleUnitDefinition's samples and create skills here, would cause some bad loop.
 def create_summon_skill(name, cool_down, battle_unit, count):

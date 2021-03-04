@@ -105,13 +105,13 @@ class PlayerUnit(BattleUnit):
     def __init__(self, health=STANDARD_HEALTH, attack=ATTACK_PLAYER, defense=DEFENSE_PLAYER, speed=SPEED_PLAYER, color=ORANGE, skills=None, health_regen=HEALTH_REGEN_PLAYER):
         if skills is None:
             skills = [
-                # deepcopy(skill_punch),
                 # deepcopy(skill_fire_ball),
                 # deepcopy(skill_ice_ball),
                 # deepcopy(skill_icy_blast),
                 # deepcopy(skill_nova),
                 # deepcopy(skill_poison_nova),
-                deepcopy(skill_multi_shot),
+                # deepcopy(skill_multi_shot),
+                deepcopy(skill_poison_barrage)
             ]
         assert len(skills) >= 1
         super().__init__(
@@ -125,6 +125,15 @@ class PlayerUnit(BattleUnit):
         )
         self.visual_range = PLAYER_BASE_VISUAL_RANGE
         self.left_click_skill_key = '1' # first skill is '1', corresponding to keyboard
+
+    # this is used to carry over player stats from level to level
+    def update_data(self, p):
+        self.health = p.health
+        self.attack = p.attack
+        self.defense = p.defense
+        self.skills = p.skills
+        self.health_regen = p.health_regen
+        self.left_click_skill_key = p.left_click_skill_key
 
 
 class EnemyUnit(BattleUnit):
@@ -244,7 +253,7 @@ enemy_kingpin_sample = EnemyUnit(
     defense=DEFENSE_ENEMY_VERY_STRONG,
     color=BLACK,
     speed=SPEED_ENEMY_VERY_FAST,
-    skills=deepcopy([skill_poison_dart, skill_fire_dart, skill_icy_blast, skill_fire_ring, skill_poison_nova, skill_nova]),
+    skills=deepcopy([skill_multi_shot, skill_fire_ring]),
     health_regen=HEALTH_REGEN_BOSS,
     aggro_range=AGGRO_RANGE_FOR_ENEMY_TOWER
 )
