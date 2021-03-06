@@ -11,15 +11,54 @@ DIR_MAP = {
 
 class SnakeGame:
     def __init__(self, h, w):
-        assert(h >= 5 and w >= 5)
+        assert(h >= 3 and w >= 3)
         self.h = h
         self.w = w
-        self.winning_threshold = self.h * self.w / 2
+        self.winning_threshold = self.h * self.w - 1
         self.snake = deque([(1, 2), (1, 1)])
         self.snakeSet = set(self.snake)
         self.apple = self.generate_apple()
         self.start()
 
+    def generate_apple(self):
+        while True:
+            cor = randint(0, self.h-1), randint(0, self.w-1)
+            print("cor = " + str(cor))
+            if cor not in self.snakeSet:
+                return cor
+
+    def is_invalid(self, cor):
+        y, x = cor
+        return cor in self.snakeSet or y < 0 or y >= self.h or x < 0 or x >= self.w
+
+    def move(self, dir):
+        head = self.snake[0]
+        if dir not in DIR_MAP:
+            print("invalid input, no action")
+            return False
+
+        delta = DIR_MAP[dir]
+        new_head = (head[0] + delta[0], head[1] + delta[1])
+
+        if new_head == self.snake[1]:
+            print("moving into neck, no action")
+            return False
+
+        if new_head != self.apple:
+            self.snakeSet.remove(self.snake.pop())
+
+        if self.is_invalid(new_head):
+            return True
+
+        self.snake.appendleft(new_head)
+        self.snakeSet.add(new_head)
+
+        if new_head == self.apple:
+            self.apple = self.generate_apple()
+
+        return False
+
+    # from here below is nice to have but not required.
     def print_board(self):
         for i in range(self.h):
             row = []
@@ -50,32 +89,5 @@ class SnakeGame:
                 print("you win")
                 break
 
-    def generate_apple(self):
-        while True:
-            cor = randint(0, self.h-1), randint(0, self.w-1)
-            if cor not in self.snakeSet:
-                return cor
 
-    def is_invalid(self, cor):
-        y, x = cor
-        return cor in self.snakeSet or y < 0 or y > self.h or x < 0 or x >= self.w
-
-    def move(self, dir):
-        head = self.snake[0]
-        assert(dir in DIR_MAP)
-        delta = DIR_MAP[dir]
-        new_head = (head[0] + delta[0], head[1] + delta[1])
-        if self.is_invalid(new_head):
-            return True
-
-        self.snake.appendleft(new_head)
-        self.snakeSet.add(new_head)
-        if new_head == self.apple:
-            self.apple = self.generate_apple()
-        else:
-            self.snakeSet.remove(self.snake.pop())
-
-        return False
-
-
-game = SnakeGame(5, 5)
+game = SnakeGame(3, 3)

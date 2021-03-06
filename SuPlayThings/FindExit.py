@@ -1,7 +1,6 @@
 import copy
 import time
 import random
-import msvcrt
 
 
 class FindDest:
