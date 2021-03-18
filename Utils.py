@@ -322,13 +322,14 @@ def combine_map(m1, m2):
 
 
 def find_path(a, b, blocks):
-    cost_hp = [(0, a, None)]
+    dist_a_b = get_dist(a, b)
+    cost_hp = [(dist_a_b + 0, a, None, 0)]
     visited = {a: (None, 0)}
-    closest = [a, get_dist(a, b)]
+    closest = (a, get_dist(a, b))
     while cost_hp:
         if b in visited:
             break
-        cost, cor, prev = heapq.heappop(cost_hp)
+        _, cor, _, _ = heapq.heappop(cost_hp)
         x, y = cor
         for dx in (-20, 0, 20):
             for dy in (-20, 0, 20):
@@ -346,10 +347,10 @@ def find_path(a, b, blocks):
                 if new_cor in visited and visited[new_cor][1] <= new_cost:
                     continue
                 visited[new_cor] = (cor, new_cost)
-                heapq.heappush(cost_hp, (new_cost, new_cor, cor))
                 dist = get_dist(new_cor, b)
+                heapq.heappush(cost_hp, (new_cost + dist, new_cor, cor, new_cost))
                 if dist < closest[1]:
-                    closest = [new_cor, dist]
+                    closest = (new_cor, dist)
 
     def back_trace(p):
         result = []
