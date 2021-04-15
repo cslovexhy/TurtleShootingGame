@@ -14,7 +14,7 @@ class SnakeGame:
         assert(h >= 3 and w >= 3)
         self.h = h
         self.w = w
-        self.winning_threshold = self.h * self.w - 1
+        self.winning_threshold = self.h * self.w * .6
         self.snake = deque([(1, 2), (1, 1)])
         self.snakeSet = set(self.snake)
         self.apple = self.generate_apple()
@@ -23,13 +23,19 @@ class SnakeGame:
     def generate_apple(self):
         while True:
             cor = randint(0, self.h-1), randint(0, self.w-1)
-            print("cor = " + str(cor))
+            # print("cor = " + str(cor))
             if cor not in self.snakeSet:
                 return cor
 
     def is_invalid(self, cor):
         y, x = cor
-        return cor in self.snakeSet or y < 0 or y >= self.h or x < 0 or x >= self.w
+        hit_body = cor in self.snakeSet
+        out_of_bound = y < 0 or y >= self.h or x < 0 or x >= self.w
+        if hit_body:
+            print("hit body")
+        if out_of_bound:
+            print("out of bound")
+        return hit_body or out_of_bound
 
     def move(self, dir):
         head = self.snake[0]
@@ -40,8 +46,8 @@ class SnakeGame:
         delta = DIR_MAP[dir]
         new_head = (head[0] + delta[0], head[1] + delta[1])
 
-        if new_head == self.snake[1]:
-            print("moving into neck, no action")
+        if len(self.snake) > 1 and new_head == self.snake[1]:
+            # print("moving into neck, no action")
             return False
 
         if new_head != self.apple:
@@ -74,13 +80,12 @@ class SnakeGame:
                 else:
                     row.append('.')
             print(" ".join(row))
-        print("- - - - - - - -")
 
     def start(self):
         while True:
             self.print_board()
-            dir = input("dir[w/s/a/d] = ?")
-            print("dir = {}".format(dir))
+            dir = input("- - - - - - - - - dir[w/s/a/d] = ?")
+            # print("dir = {}".format(dir))
             dead = self.move(dir)
             if dead:
                 print("you lose")
