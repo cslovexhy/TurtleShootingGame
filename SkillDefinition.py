@@ -84,6 +84,9 @@ class SimpleRangedSkill(Skill):
         # print("obj_id = {}, visited = {}".format(str(self.visited), result))
         return result
 
+    def increase_power(self):
+        self.conversion += 0.1
+
 
 class SimpleSummonSkill(Skill):
     def __init__(self, name, cool_down, battle_unit, attack_range=250, count=1):
