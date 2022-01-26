@@ -226,7 +226,7 @@ class GameView:
         skill = attacker.battle_unit_data.skills[attacker.battle_unit_data.left_click_skill_key]
         if isinstance(skill, SimpleSummonSkill):
             print("skill.battle_unit.type = " + str(skill.battle_unit.type))
-            return self.add_summoned_enemy(skill, target_cor)
+            return self.add_summoned_enemy(skill, (attacker.xcor(), attacker.ycor()))
         elif isinstance(skill, SimpleNovaSkill):
             self.fire_nova(attacker, target_cor, self.enemy_missiles)
         elif isinstance(skill, SimpleMultiShotSkill):

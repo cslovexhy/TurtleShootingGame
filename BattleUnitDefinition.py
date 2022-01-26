@@ -41,11 +41,11 @@ HEALTH_REGEN_BOSS = 0.5
 
 # --- AGGRO RELATED ---
 # if player stays too close, will gain enemy's aggro
-AGGRO_RANGE_FOR_ENEMY_NORMAL = 150
-AGGRO_RANGE_FOR_ENEMY_SCOUT = 200
-AGGRO_RANGE_FOR_ENEMY_TOWER = 250
+AGGRO_RANGE_FOR_ENEMY_NORMAL = 90
+AGGRO_RANGE_FOR_ENEMY_SCOUT = 120
+AGGRO_RANGE_FOR_ENEMY_TOWER = 200
 # rally radius around the enemy being hit.
-AGGRO_RANGE_FOR_HIT = 150
+AGGRO_RANGE_FOR_HIT = 30
 
 
 class BattleUnit:
@@ -218,11 +218,11 @@ enemy_suicide_drone_sample = EnemyUnit(
     skills=deepcopy([skill_suicide_attack])
 )
 
-skill_summon_biker = SimpleSummonSkill(name="Summon biker", cool_down=10, battle_unit=get_summoned_sample(enemy_biker_sample), count=2, attack_range=300)
-skill_summon_enforcer = SimpleSummonSkill(name="Summon enforcer", cool_down=10, battle_unit=get_summoned_sample(enemy_enforcer_sample), count=2, attack_range=300)
-skill_summon_freezer = SimpleSummonSkill(name="Summon freezer", cool_down=10, battle_unit=get_summoned_sample(enemy_freezer_sample), count=2, attack_range=300)
-skill_summon_flamethrower = SimpleSummonSkill(name="Summon flamethrower", cool_down=10, battle_unit=get_summoned_sample(enemy_flamethrower_sample), count=2, attack_range=300)
-skill_summon_suicide_drone = SimpleSummonSkill(name="Summon suicide_drone", cool_down=10, battle_unit=get_summoned_sample(enemy_suicide_drone_sample), count=2, attack_range=300)
+skill_summon_biker = SimpleSummonSkill(name="Summon biker", cool_down=15, battle_unit=get_summoned_sample(enemy_biker_sample), count=2, attack_range=300)
+skill_summon_enforcer = SimpleSummonSkill(name="Summon enforcer", cool_down=20, battle_unit=get_summoned_sample(enemy_enforcer_sample), count=1, attack_range=300)
+skill_summon_freezer = SimpleSummonSkill(name="Summon freezer", cool_down=30, battle_unit=get_summoned_sample(enemy_freezer_sample), count=1, attack_range=300)
+skill_summon_flamethrower = SimpleSummonSkill(name="Summon flamethrower", cool_down=30, battle_unit=get_summoned_sample(enemy_flamethrower_sample), count=1, attack_range=300)
+skill_summon_suicide_drone = SimpleSummonSkill(name="Summon suicide_drone", cool_down=60, battle_unit=get_summoned_sample(enemy_suicide_drone_sample), count=1, attack_range=300)
 
 enemy_underboss_sample = EnemyUnit(
     type=ENEMY_TYPE_UNDERBOSS,
