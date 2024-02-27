@@ -66,6 +66,7 @@ class SnakeGame:
 
     # from here below is nice to have but not required.
     def print_board(self):
+        print("snake length = {}, snake = {}".format(str(len(self.snake)), str(self.snake)))
         for i in range(self.h):
             row = []
             for j in range(self.w):
@@ -88,11 +89,11 @@ class SnakeGame:
             # print("dir = {}".format(dir))
             dead = self.move(dir)
             if dead:
-                print("you lose")
+                print("you lose, final length = {}, snake = {}".format(str(len(self.snake)), str(self.snake)))
                 break
             elif len(self.snake) >= self.winning_threshold:
-                print("you win")
+                print("you win, final length = {}".format(str(len(self.snake))))
                 break
 
 
-game = SnakeGame(3, 3)
+game = SnakeGame(6, 6)

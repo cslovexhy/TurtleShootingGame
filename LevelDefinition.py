@@ -4,8 +4,8 @@ from WallUnitDefinition import *
 from MapDefinition import *
 
 MIN_LEVEL = 1
-MAX_LEVEL = 7
-START_LEVEL = 1
+MAX_LEVEL = 8
+START_LEVEL = 8
 
 MAX_GAME_TIME = 3600
 
