@@ -321,51 +321,68 @@ def combine_map(m1, m2):
     return m
 
 
-def find_path(a, b, blocks):
-    dist_a_b = get_dist(a, b)
-    cost_hp = [(dist_a_b + 0, a, None, 0)]
-    visited = {a: (None, 0)}
-    closest = (a, get_dist(a, b))
-    while cost_hp:
-        if b in visited:
-            break
-        _, cor, _, _ = heapq.heappop(cost_hp)
-        x, y = cor
+def find_path(start, goal, blocks):
+    if start == goal:
+        return True, [start]
+    
+    open_set = [(get_dist(start, goal), 0, start, None)]
+    g_scores = {start: 0}
+    closed_set = set()
+    parents = {}
+    closest = (start, get_dist(start, goal))
+    
+    while open_set:
+        f_score, g_score, current, parent = heapq.heappop(open_set)
+        
+        if current in closed_set:
+            continue
+            
+        closed_set.add(current)
+        parents[current] = parent
+        
+        if current == goal:
+            path = []
+            while current is not None:
+                path.append(current)
+                current = parents[current]
+            return True, path[::-1]
+        
+        dist_to_goal = get_dist(current, goal)
+        if dist_to_goal < closest[1]:
+            closest = (current, dist_to_goal)
+        
+        x, y = current
         for dx in (-20, 0, 20):
             for dy in (-20, 0, 20):
-                new_x, new_y = x + dx, y + dy
-                new_cor = (new_x, new_y)
-                # if visited or hit a wall, continue
-                if new_cor in blocks:
+                if dx == 0 and dy == 0:
                     continue
-                # if diagonal a -> b step got blocked by something like below, continue
-                # a x  or  a x  or  a +
-                # x b      + b      x b
-                if (new_x, y) in blocks or (x, new_y) in blocks:
+                    
+                neighbor = (x + dx, y + dy)
+                
+                if neighbor in blocks or neighbor in closed_set:
                     continue
-                new_cost = visited[cor][1] + get_dist(cor, new_cor)
-                if new_cor in visited and visited[new_cor][1] <= new_cost:
+                
+                if dx != 0 and dy != 0:
+                    if (x + dx, y) in blocks or (x, y + dy) in blocks:
+                        continue
+                
+                tentative_g = g_score + get_dist(current, neighbor)
+                
+                if neighbor in g_scores and tentative_g >= g_scores[neighbor]:
                     continue
-                visited[new_cor] = (cor, new_cost)
-                dist = get_dist(new_cor, b)
-                heapq.heappush(cost_hp, (new_cost + dist, new_cor, cor, new_cost))
-                if dist < closest[1]:
-                    closest = (new_cor, dist)
-
-    def back_trace(p):
-        result = []
-        while p is not None:
-            result.append(p)
-            p = visited[p][0]
-        return result
-
-    if b not in visited:
-        # print("not reachable, go to closest point {}".format(str(closest[0])))
-        res = back_trace(closest[0])
-        return False, res[::-1]
-
-    res = back_trace(b)
-    return True, res[::-1]
+                
+                g_scores[neighbor] = tentative_g
+                h_score = get_dist(neighbor, goal)
+                f_score = tentative_g + h_score
+                
+                heapq.heappush(open_set, (f_score, tentative_g, neighbor, current))
+    
+    path = []
+    current = closest[0]
+    while current is not None:
+        path.append(current)
+        current = parents.get(current)
+    return False, path[::-1]
 
 
 # from a to b, considering walls cannot be passed
